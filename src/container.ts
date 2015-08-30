@@ -113,7 +113,7 @@ export class Container {
     /**
      * Register definition as callable. The callable will be invoked instead calling via new()
      */
-    public registerCallable(definition: string|Function, callable: () => any) {
+    public registerCallable(definition: string|Function, callable: () => any): Definition {
         let def: Definition;
         def = new Definition(definition, callable, null, FactoryMethod.SINGLETON, DefinitionObjectType.CALLABLE);
         this.definitions.set(definition, def);
