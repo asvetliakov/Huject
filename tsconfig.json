@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "umd",
+    "module": "commonjs",
     "target": "ES5",
     "preserveConstEnums": true,
     "emitDecoratorMetadata": true,

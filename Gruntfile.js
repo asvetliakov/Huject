@@ -17,8 +17,6 @@ module.exports = function(grunt) {
                 tsconfig: './tsconfig.json'
             }
         }
-
-
     });
 
 
