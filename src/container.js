@@ -3,18 +3,53 @@
 require('es6-collections');
 require('reflect-metadata');
 var definition_1 = require('./definition');
+/**
+ * DI Container class
+ */
 var Container = (function () {
+    /**
+     * @constructor
+     */
     function Container() {
+        /**
+         * If true allows to resolve unregistered definitions
+         * @type {boolean}
+         */
         this.allowUnregisteredResolve = false;
         this.definitions = new Map();
         this.singletonObjects = new WeakMap();
     }
+    /**
+     * Sets if unregistered definitions are allowed to be resolved
+     * This is useful to avoid many stub container.register(Class) class, but you need to be careful to not create
+     * interface instead of implementation or use abstract classes (available from typescript 1.6) as interface classes
+     * @param allow true to allow, false to disallow
+     * @example
+     *      import Service from './service'
+     *
+     *      @ConstructorInject
+     *      class Controller {
+     *          private service: Service;
+     *          public constructor(myService: Service} {
+     *              this.service = myService
+     *          }
+     *      }
+     *
+     *      let controller = container.resolve(Controller);
+     */
     Container.prototype.setAllowUnregisteredResolving = function (allow) {
         this.allowUnregisteredResolve = allow;
     };
+    /**
+     * Register implementation to interface object
+     * @param definition
+     * @param implementationOrConstructorArgs
+     * @param constructorArgs
+     */
     Container.prototype.register = function (definition, implementationOrConstructorArgs, constructorArgs) {
         var def;
         if (!implementationOrConstructorArgs) {
+            // specific case: register(Class)
             if (typeof definition === "string") {
                 throw new Error("Can't register just symbol");
             }
@@ -22,23 +57,37 @@ var Container = (function () {
         }
         else {
             if (typeof definition === "function") {
+                // Cases:
+                //  1. register(Class, Class)
+                //  2. register(Class, [constructorArgs])
+                //  3. register(Class, Class, [constructorArgs])
+                //  4. register(Class, object)
                 if (implementationOrConstructorArgs instanceof Array) {
+                    // Case 2.
                     def = new definition_1.Definition(definition, definition, implementationOrConstructorArgs);
                 }
                 else {
                     if (typeof implementationOrConstructorArgs == "object") {
+                        // Case 4
                         def = new definition_1.Definition(definition, implementationOrConstructorArgs, null, definition_1.FactoryMethod.OBJECT);
                     }
                     else {
+                        // Cases 1, 3
                         def = new definition_1.Definition(definition, implementationOrConstructorArgs, constructorArgs);
                     }
                 }
             }
             else {
+                // Cases:
+                //  1. register('string', Class)
+                //  2. register('string', Class, [constructorArgs])
+                //  4. register('string', 'number|string|object|boolean')
                 if (typeof implementationOrConstructorArgs === "function") {
+                    // Case  1,2
                     def = new definition_1.Definition(definition, implementationOrConstructorArgs, constructorArgs);
                 }
                 else {
+                    // Case 3
                     def = new definition_1.Definition(definition, implementationOrConstructorArgs, null, definition_1.FactoryMethod.OBJECT);
                 }
             }
@@ -46,12 +95,20 @@ var Container = (function () {
         this.definitions.set(definition, def);
         return def;
     };
+    /**
+     * Register definition as callable. The callable will be invoked instead calling via new()
+     */
     Container.prototype.registerCallable = function (definition, callable) {
         var def;
         def = new definition_1.Definition(definition, callable, null, definition_1.FactoryMethod.SINGLETON, definition_1.DefinitionObjectType.CALLABLE);
         this.definitions.set(definition, def);
         return def;
     };
+    /**
+     * Resolves definition
+     * @param definition
+     * @param method
+     */
     Container.prototype.resolve = function (definition, method) {
         var internalDefinition = this.definitions.get(definition);
         if (!internalDefinition) {
@@ -96,6 +153,11 @@ var Container = (function () {
                 break;
         }
     };
+    /**
+     * Resolves definition
+     * @private
+     * @param definition
+     */
     Container.prototype.resolveDefinition = function (definition) {
         if (definition.definitionObjectType == definition_1.DefinitionObjectType.CALLABLE || definition.method == definition_1.FactoryMethod.OBJECT) {
             return definition.definitionConstructor;
@@ -103,6 +165,7 @@ var Container = (function () {
         var constructor = this.resolveConstructor(definition);
         var constructorArguments = [];
         if (Reflect.hasOwnMetadata("inject:constructor", constructor)) {
+            // Resolve constructor dependencies
             var dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
             var resolvedDeps = [];
             if (dependencies) {
@@ -114,6 +177,7 @@ var Container = (function () {
             constructorArguments = resolvedDeps;
         }
         else {
+            // No constructor injection, lookup for constructor arguments in definition
             constructorArguments = this.resolveConstructorArguments(definition);
             if (!constructorArguments) {
                 constructorArguments = [];
@@ -125,6 +189,10 @@ var Container = (function () {
         newConstructor.prototype = constructor.prototype;
         return newConstructor;
     };
+    /**
+     * Injects parameters into object
+     * @param object
+     */
     Container.prototype.resolveParameters = function (object) {
         var test = Reflect.getMetadataKeys(object);
         for (var key in object) {
@@ -136,6 +204,11 @@ var Container = (function () {
             }
         }
     };
+    /**
+     * Resolves constructor by looking in definition chain
+     * @private
+     * @param definition
+     */
     Container.prototype.resolveConstructor = function (definition) {
         var constructor = definition.definitionConstructor;
         if (this.definitions.has(constructor) && constructor != definition.key) {
@@ -143,6 +216,12 @@ var Container = (function () {
         }
         return constructor;
     };
+    /**
+     * Resolves constructor arguments from definition chain
+     * @private
+     * @param definition
+     * @returns {Array<any>}
+     */
     Container.prototype.resolveConstructorArguments = function (definition) {
         var constructorArgs = definition.constructorArgs;
         if (!constructorArgs && this.definitions.has(definition.definitionConstructor) && (definition.definitionConstructor != definition.key)) {

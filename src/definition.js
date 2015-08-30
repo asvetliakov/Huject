@@ -11,8 +11,24 @@ var FactoryMethod = exports.FactoryMethod;
 })(exports.DefinitionObjectType || (exports.DefinitionObjectType = {}));
 var DefinitionObjectType = exports.DefinitionObjectType;
 var Definition = (function () {
+    /**
+     * @constructor
+     * @param key
+     * @param definitionConstructor
+     * @param constructorArgs
+     * @param factoryMethod
+     * @param objectType
+     */
     function Definition(key, definitionConstructor, constructorArgs, factoryMethod, objectType) {
+        /**
+         * Method to create objects. Factory by default
+         * @type {FactoryMethod}
+         */
         this.method = FactoryMethod.FACTORY;
+        /**
+         * Object type
+         * @type {DefinitionObjectType}
+         */
         this.definitionObjectType = DefinitionObjectType.CLASS;
         this.key = key;
         this.definitionConstructor = definitionConstructor;
@@ -26,6 +42,11 @@ var Definition = (function () {
             this.definitionObjectType = objectType;
         }
     }
+    /**
+     * Changes factory method
+     * @param method
+     * @return {Definition}
+     */
     Definition.prototype.as = function (method) {
         this.method = method;
         return this;

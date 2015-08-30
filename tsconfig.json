@@ -14,6 +14,12 @@
     "src/index.ts",
     "tests/bootstrap.ts",
     "tests/container.spec.ts",
-    "tests/decorators.spec.ts"
+    "tests/decorators.spec.ts",
+    "example/bootstrap.ts",
+    "example/DeepService.ts",
+    "example/FirstService.ts",
+    "example/main.ts",
+    "example/SecondService.ts",
+    "example/ServiceInterface.ts"
   ]
 }

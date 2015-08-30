@@ -32,6 +32,9 @@ node_modules
 # TSD typings
 typings
 
+example/*.js
+example/*.js.map
+
 .tscache
 
 # Idea stuff

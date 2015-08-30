@@ -2,12 +2,10 @@
  * Exporting library here
  */
 var container_1 = require('./container');
+exports.Container = container_1.Container;
 var definition_1 = require('./definition');
+exports.FactoryMethod = definition_1.FactoryMethod;
 var decorators_1 = require('./decorators');
-exports.default = {
-    Container: container_1.Container,
-    FactoryMethod: definition_1.FactoryMethod,
-    ConstructorInject: decorators_1.ConstructorInject,
-    Inject: decorators_1.Inject
-};
+exports.ConstructorInject = decorators_1.ConstructorInject;
+exports.Inject = decorators_1.Inject;
 //# sourceMappingURL=index.js.map
