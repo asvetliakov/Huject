@@ -1,0 +1,32 @@
+{
+  "name": "huject",
+  "version": "1.0.0",
+  "description": "Human injection for typescript",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "typescript",
+    "ioc",
+    "di",
+    "dependencyinjection"
+  ],
+  "author": "<Alexey Svetliakov> devpieron@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "grunt": "^0.4.5",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-ts": "^5.0.0-beta.1",
+    "mocha": "^2.2.5",
+    "sinon": "^1.16.1",
+    "sinon-chai": "^2.8.0",
+    "source-map-support": "^0.3.2",
+    "typescript": "^1.5.3",
+  },
+  "dependencies": {
+    "es6-collections": "^0.5.5",
+    "reflect-metadata": "^0.1.0"
+  }
+}

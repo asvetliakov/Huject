@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "umd",
+    "target": "ES5",
+    "preserveConstEnums": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "experimentalDecorators": true
+  },
+  "files": [
+    "src/container.ts",
+    "src/decorators.ts",
+    "src/definition.ts",
+    "src/index.ts",
+    "tests/bootstrap.ts",
+    "tests/container.spec.ts",
+    "tests/decorators.spec.ts"
+  ]
+}
