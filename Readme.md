@@ -212,7 +212,9 @@ You can specify dependencies by using decorators:
 ```
 
 *Note*: @Inject() and @Inject are not same
+
 **Important**: You can combine both property and constructor style injection, but do not use ordinary constructor arguments when using constructor injection.
+
 That will not work!
 ```typescript
 @ConstructorInject
@@ -299,7 +301,7 @@ but you need to have a reference to constructor functions anyway, so i'd recomme
 
 
 ## Typescript interfaces and implementation->interface binding
-In typescript the interfaces are not a real objects in javascript realtime. I'd suggest you initially going to write something like this:
+In typescript the interfaces are not a real objects in javascript realtime. I'd suggest you initially were going to write something like it:
 ```typescript
 
 interface ServiceInterface {
