@@ -1,37 +1,75 @@
-# Typescript depedency injection for humans!
+# Typescript dependency injection for humans!
 ## Reason
-I wasn't happy with any found DI container both for Typescript and Javascript. Each is missing some required feature: one has construction autowiring but doesn't have property injection and ability to register ordinary constructor parameters, other has an ability to register or pass constructor params but doesn't have typescript autowiring, etc...
+I wasn't happy with any found DI container both for Typescript and Javascript. Each was missing some required feature: one had construction injection autowiring but didn't have property injection and ability to pass ordinary constructor parameters when instantiating, other had an ability to register or pass constructor params but didn't have typescript features, etc...
 
 ## Features
 This DI container supports:
 * Constructor injection
 * Property injection
 * Callable injection
-* Service locator pattern (register primitive, object, class or callable by string symbol)
-* Autowiring
+* Service locator pattern (register and resolve primitive, object, class or callable by string definition)
+* Property and constructor dependencies autowiring
 * Simple API, just 3 methods to go
 
 ## API
-This library is intended to use only with typescript 1.5+ and --emitDecoratorMetadata flag enabled. Do not use with javascript
+This library is intended to use only with typescript **1.5+** and **--emitDecoratorMetadata** flag enabled. Do not use it with just Javascript
 
-### Initializing
+### Initialization
+To use the the library you need to create new Container object. Do it in one place, perhaps in application bootstrap file
 ```typescript
+/// <reference path="node_modules/huject/huject.d.ts" />
 import {Container} from 'huject'
 let container = new Container();
 ```
+Do not to forgot to specify reference path
 
 ### container.register() method
-Each dependency should be registered, unless *container.setAllowUnregisteredResolving(true)* was called
 ```typescript
-container.register(definition: string|Function, implementationOrConstructorArgs?: Object|Function|Array<any>, constructorArgs?: Array<any>): Definition;
+/**
+  * Register class definition
+  * @param classDefinition Class definition
+  * @param constructorArguments Optional array of constructor arguments. They will be passed to constructor when object will be instantiated
+  */
+register<T>(classDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+/**
+  * Bind class to another class (interface)
+  * @param interfaceDefinition An interface to bind to
+  * @param implementationDefinition Class definition
+  * @param constructorArguments Optional array of constructor arguments
+  */
+register<T>(interfaceDefinition: Instantiable<T>, implementationDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+/**
+  * Bind pre-created object to class definition. The object will be used when defined class is instantiated
+  * @param classDefinition Class definition
+  * @param object Object
+  */
+register<T>(classDefinition, object: Object): Definition;
+/**
+  * Bind class definition to string. Object could be later instantiated by resolve('symbol');
+  * @param symbolDefinition String
+  * @param classDefinition Class definition
+  * @param constructorArguments Optional array of constructor arguments
+  */
+register<T>(symbolDefinition: string, classDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+/**
+  * Bind object to string definition
+  * @param symbolDefinition String
+  * @param Object Object
+  */
+register(symbolDefinition: string, Object: any): Definition;
 ```
-* **definition** is class function or string symbol
-* **implementationOrConstructorArgs**:
-    * Object - Link any object with definition
-    * Function - Link another class function with definition (interface to implementation)
-    * Array - Link constructor arguments for definition (Useful to pass configuration to external services)
-* **constructorArgs** - Array of construction arguments
-**Returns** Definition object, used to set FactoryMethod for created definition
+Each function returns Definition object, which has following signature:
+```typescript
+    interface Definition {
+        /**
+         * Change FactoryMethod type for definition
+         * @param method Factory method type
+         */
+        as(method: FactoryMethod): Definition;
+    }
+```
+
+It may be used to override default factory method used when instantiating objects. By default all definitions have FACTORY method
 
 **Examples**
 ```typescript
@@ -44,6 +82,9 @@ container.register(MyInterfaceImplementation, ['param1', 'value1']);
 // Register class to interface. Constructor arguments from previous registration will be passed when resolving MyInterface as well
 container.register(MyInterface, MyInterfaceImplementation);
 
+// Container will catch error if you're trying to register incorrect implementation with interface
+container.register(MyInterface, WrongImplementation);  // error
+
 // Register interface to implementation with constructor arguments. Arguments will overwrite previous arguments registration for MyInterfaceImplementation
 container.register(MyInterface, MyInterfaceImplementation, ['accesskey', 'accesstoken']);
 
@@ -51,42 +92,64 @@ container.register(MyInterface, MyInterfaceImplementation, ['accesskey', 'access
 let myService = new MyService();
 container.register(MyServiceInterface, myService);
 
-// register class by string
+// Assign class to string definition (service locator pattern)
 container.register(MyDBWrapper, ['host','username','password']);
 container.register('db', MyDBWrapper);
 
-// register class with constructer arguments by string
+// Assign class with constructor arguments to string definition
 // same as previous declaration
 container.register('db', MyDBWrapper, ['host','username','password']);
 
-// Register any value by string
+// Assign any value to string definition
 container.register('secretkey', 'qwerrty12345');
 container.register('secretflag', true);
 container.register('secreteoptions', { opt1: 'val1'});
 ```
 
 ### container.registerCallable() method
+Register callable with class or string definition. The main difference with just register() is that the container doesn't try to instantiate callable via new and returns callable value as resolve value
 ```typescript
-container.registerCallable(definition: string|Function, callable: () => any): Definition
+/**
+  * Bind callable function to class definition. Instead creating new object the function result will be used instead
+  * @param classDefinition Class definition
+  * @param callable Callable
+  */
+registerCallable<T>(classDefinition: Instantiable<T>, callable: () => T): Definition;
+/**
+  * Bind callable function to string definition. Instead creating new object the function result will be used instead
+  * @param symbolDefinition String definition
+  * @param callable Callable
+  */
+registerCallable<T>(symbolDefinition: string, callable: () => T): Definition;
 ```
-Registers callable (anonymous function or lambda function) with definition. The main difference with register() is that container is executing provided callable and returning result
 
 **Examples**
 ```typescript
+// Register implementation to interface
 container.registerCallable(MyServiceInterface, () => {
     return new MyServiceImplementation();
 });
-
+// Assign class to string definition
 container.registerCallable('db', () => {
 return new DBWrapper(container.get('host'), container.get('username'), ...);
 ```
 
 ### container.resolve() method
+Resolves definition. It will resolve any registered dependencies for instance too
 ```typescript
-let implementation = container.resolve(definition: string|Function, method?: FactoryMethod): any 
+/**
+  * Resolve (instantiate) object from container. Will resolve all wired dependencies if they were specified by decorators
+  * @param definition Class definition
+  * @param method Factory method. Used to override definition method only for this instantiation
+  */
+resolve<T>(definition: Instantiable<T>, method?: FactoryMethod): T;
+/**
+  * Resolve {instantiate} object from container by string definition. Will resolve all wired dependencies if they were specified by decorators
+  * @param definition Class definition
+  * @param method Factory method. Used to override definition method only for this instantiation
+  */
+resolve(definition: string, method?: FactoryMethod): any;
 ```
-Resolves definition by looking all dependency chains. You probably need to call this function only once (avoid using service locator pattern) and in bootstrap/main file
-**method** allows to override definition factory method
 
 **Examples**
 ```typescript
@@ -95,11 +158,21 @@ let implementation = container.resolve('db');
 ```
 
 ### FactoryMethod enum
-By default resolve() resolves new instance each time as called. By setting FactoryMethod you can override this behavior
-Container supports 3 methods:
-* **FACTORY** - Default behavior. Returns new instance when requested
-* **SINGLETON** - Returns same singleton object when requested
-* **OBJECT** - Returns plain object or function method without trying to instantiate it via new()
+By default resolve() resolves new instance each time as called. By setting FactoryMethod either in register() or resolve() you can override this behavior
+
+```typescript
+/**
+  * Used to specify instantiate method
+  */
+export const enum FactoryMethod {
+    /** Singleton. Each instantiation will share same object */
+    SINGLETON,
+    /** Factory. Each instantiation will return new object */
+    FACTORY,
+    /** Object. Do not try to instantiate object and return original function or object */
+    OBJECT
+}
+```
 
 **Examples**
 ```typescript
@@ -126,12 +199,46 @@ let impl = container.resolve(MyClass); // Original constructor function
 let obj = new impl();
 ```
 
-## Autowiring
-Autowiring is enabled by decorators, you can have property autowiring and constructor autowiring. You can combine these 2 methods
+## Decorators
+You can specify dependencies by using decorators:
+
+```typescript
+// Use at top of class property. Resolves by using factory method in definition or default (FACTORY) one
+@Inject
+// Use at top of class property. Same as @Inject but specifies factory method to resolve
+@Inject(method: FactoryMethod);
+// Use at top of class definition. Takes dependencies from constructor arguments
+@ConstructorInject
+```
+
+*Note*: @Inject() and @Inject are not same
+**Important**: You can combine both property and constructor style injection, but do not use ordinary constructor arguments when using constructor injection.
+That will not work!
+```typescript
+@ConstructorInject
+class Test {
+    public constructor(service: MyService, param1: string, param2: number) {
+        ....
+    }
+}
+```
+But that will:
+```typescript
+class Test {
+    @Inject
+    public service: MyService;
+    
+    public constructor(param1: string, param2: number) {
+        ...
+    }
+}
+```
+
+
+**Examples**:
+
 ```typescript
 import {Inject, ConstructorInject, FactoryMethod} from 'huject';
-
-// Constructor injection autowiring is enabled by @ConstructorInject decorator
 
 @ConstructorInject
 class TestController1 {
@@ -149,7 +256,7 @@ class TestController1 {
     }
 }
 ```
-Here the service1 and service2 are wired by constructor injection and service3 and service4 are wired by property injection. You must have a public property to do property autowiring.
+Here the service1 and service2 are being resolved by constructor injection and service3 and service4 are resolved by property injection. You must have a public property to do property injection.
 The @Inject(FactoryMethod) syntax is used to override factory method for inject property. These objects will be equal:
 ```typescript
 @Inject(FactoryMethod.SINGLETON)
@@ -164,6 +271,7 @@ public service5: FiveService;
 @Inject(FactoryMethod.FACTORY)
 public service6: FiveService;
 ```
+
 Also the service classes should be registered in container first. If any constructor params or implementation bindings were bound to these service, they will be applied automatically.
 ```typescript
  import {OneService} from 'FirstService';
@@ -172,7 +280,8 @@ Also the service classes should be registered in container first. If any constru
  container.register(SecondService, ['param1', 'param2', true]);
  ```
  
- You can change this param by setting container.setAllowUnregisteredResolving(true) so you don't need to do simple registration before:
+You can change this param by setting **container.setAllowUnregisteredResolving(true)** so you don't need to do simple container.register(class) registration:
+
  ```typescript
 import {OneService} from 'FirstService';
 import {SecondService} from 'SecondService';
@@ -186,11 +295,11 @@ public service2: SecondService;
 ...
 }
 ```
-but you need to have a reference to constructor function anyway, so i'll recommend avoid to depends on service directly and use interfaces
+but you need to have a reference to constructor functions anyway, so i'd recommend avoid to depend on services directly and use interfaces (or class-like analogs)
 
 
-## Typescript interfaces and binding interfaces to implementation
-In typescript interfaces are not real object in javascript realtime. I think initially you want to wrote something like this:
+## Typescript interfaces and implementation->interface binding
+In typescript the interfaces are not a real objects in javascript realtime. I'd suggest you initially going to write something like this:
 ```typescript
 
 interface ServiceInterface {
@@ -218,12 +327,14 @@ container.register(MyController);
 
 let controller = container.resolve(MyController); //error
 ```
-but you can't. There is no enough runtime information for interfaces so ServiceInterface will be just Object.
+but you can't. There is no enough runtime information for interfaces so ServiceInterface will be just empty Object and resolve lookup will fail.
 
-Here you can 2 ways to workaround:
+Here you can have 2 ways to workaround this problem:
+
 ### Use class as interface
-You can write class instead of interface:
+You can write class instead interface:
 ```typescript
+
 // Just use class keyword
 class ServiceInterface {
     public method1(): void {}; // add empty method body
@@ -250,9 +361,10 @@ container.register(MyController);
 
 let controller = container.resolve(MyController); //OK
 ```
-Nothing wrong here since interface is a shape, but class is a shape too. One problem you need to watch for you 'classed' interfaces to avoid creation this interface at runtime:
-```typescript
 
+Nothing wrong here since interface is a shape, but class is a shape too. One problem you need to watch for you 'classed' interfaces and avoid creation these interfaces at runtime:
+
+```typescript
 class ServiceInterface {
     public method1(): void {}; // add empty method body
     public method2(num: number): string {}; // add empty method body
@@ -273,12 +385,15 @@ class MyController {
     public service: ServiceInterface
 }
 
+// allow to resolve unregistered definitions
 container.setAllowUnregisteredResolving(true);
 container.register(MyController); // forgot to bind ServiceInterface to MyService here
 
 let controller = container.resolve(MyController); // Ok, but controller.service will have an empty ServiceInterface object instead correctly MyService object
 ```
-That's why i explicitly enabled strong function registration. Without *container.setAllowUnregisteredResolving(true)* the 
+
+That's why i explicitly enabled strong container registration. Without *container.setAllowUnregisteredResolving(true)* the 
+
 ```typescript
 let controller = container.resolve(MyController);
 ```
@@ -314,15 +429,17 @@ container.register(MyController); // forgot to bind ServiceInterface to MyServic
 let controller = container.resolve(MyController); // Error here. Cann't instantiate abstract ServiceInterface class
 ```
 
-## Examples
-See example/ directory. To build you need to have grunt first
+## Example
+In example/ directory you can see completely working DI example. To build you need to run grunt first
 ```bash
 npm install -g grunt-cli
 npm install
 grunt
+node example/main.js
 ```
 
-to run tests run:
+## Tests
+To run tests type:
 ```bash
 grunt test
 ```
