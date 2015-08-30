@@ -1,10 +1,10 @@
 {
   "name": "huject",
   "version": "1.0.0",
-  "description": "Human injection for typescript",
-  "main": "./src/index",
+  "description": "Typescript dependency injection container for humans",
+  "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "keywords": [
     "typescript",
@@ -12,7 +12,14 @@
     "di",
     "dependencyinjection"
   ],
-  "author": "<Alexey Svetliakov> devpieron@gmail.com",
+  "author": {
+    "name": "Alexey Svetliakov",
+    "email": "devpieron@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asvetliakov/huject.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "chai": "^3.2.0",
