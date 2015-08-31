@@ -187,8 +187,15 @@ export class Container {
             let dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
             let resolvedDeps = [];
             if (dependencies) {
-                for (let dep of dependencies) {
-                    resolvedDeps.push(this.resolve(dep));
+                for (let i = 0; i < dependencies.length; i++) {
+                    let dep = dependencies[i];
+                    let method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
+                    // Use literal for resolving if specified
+                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
+                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
+                    }
+
+                    resolvedDeps.push(this.resolve(dep, method));
                 }
             }
             constructorArguments = resolvedDeps;
@@ -216,8 +223,15 @@ export class Container {
         for (let key in object) {
             if (Reflect.hasMetadata("inject:property", object, key)) {
                 let method: FactoryMethod = Reflect.getMetadata("inject:property", object, key);
-                let paramType = Reflect.getMetadata("design:type", object, key);
-                let resolvedObj = this.resolve(paramType, method);
+                let paramDefinition: string|Function;
+                if (Reflect.hasMetadata('inject:property:literal', object, key)) {
+                    // Resolve property by string literal
+                    paramDefinition = Reflect.getMetadata('inject:property:literal', object, key);
+                } else {
+                    // Resolve property by typehint
+                    paramDefinition = Reflect.getMetadata('design:type', object, key);
+                }
+                let resolvedObj = this.resolve(paramDefinition, method);
                 object[key] = resolvedObj;
             }
         }

@@ -169,9 +169,14 @@ var Container = (function () {
             var dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
             var resolvedDeps = [];
             if (dependencies) {
-                for (var _i = 0; _i < dependencies.length; _i++) {
-                    var dep = dependencies[_i];
-                    resolvedDeps.push(this.resolve(dep));
+                for (var i = 0; i < dependencies.length; i++) {
+                    var dep = dependencies[i];
+                    var method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
+                    // Use literal for resolving if specified
+                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
+                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
+                    }
+                    resolvedDeps.push(this.resolve(dep, method));
                 }
             }
             constructorArguments = resolvedDeps;
@@ -198,8 +203,16 @@ var Container = (function () {
         for (var key in object) {
             if (Reflect.hasMetadata("inject:property", object, key)) {
                 var method = Reflect.getMetadata("inject:property", object, key);
-                var paramType = Reflect.getMetadata("design:type", object, key);
-                var resolvedObj = this.resolve(paramType, method);
+                var paramDefinition = void 0;
+                if (Reflect.hasMetadata('inject:property:literal', object, key)) {
+                    // Resolve property by string literal
+                    paramDefinition = Reflect.getMetadata('inject:property:literal', object, key);
+                }
+                else {
+                    // Resolve property by typehint
+                    paramDefinition = Reflect.getMetadata('design:type', object, key);
+                }
+                var resolvedObj = this.resolve(paramDefinition, method);
                 object[key] = resolvedObj;
             }
         }

@@ -94,18 +94,92 @@ declare module "huject" {
     /**
      * Property injection
      * @param method Specify to override factory method for registration
+     * @example
+     * class MyClass {
+     *     @Inject(FactoryMethod.SINGLETON)
+     *     public service: MyService;
+     * }
      */
     export function Inject(method: FactoryMethod);
+
+    /**
+     * Property injection by string literal. Literal should be registered with container.register('literal',...); before using
+     * @param literal String literal
+     * @param method Optional factory method
+     * @example
+     * class MyClass {
+     *     @Inject('coolnumber')
+     *     public num: number;
+     *
+     *     @Inject('classToken')
+     *     public token: string;
+     * }
+     */
+    export function Inject(literal: string, method?: FactoryMethod);
+
     /**
      * Property injection. Will instantiate with default factory method or with registered method if dependency was already registered
      * @param target
      * @param propertyKey
+     * @example
+     * class MyClass {
+     *     @Inject
+     *     public service: MyService;
+     * }
      */
     export function Inject(target: Object, propertyKey: string|symbol): void;
 
     /**
-     * Constructor injection. Do not mess constructor injection with ordinary (non-injected) params
+     * Constructor injection. Do not mess constructor injection with ordinary (non-injected) params.
+     * To inject ordinary params by literal use @ConstructorInject('literal') in constructor parameters
      * @param target
+     * @example
+     * @ConstructorInject
+     * Class MyClass {
+     *     private service: MyService;
+     *     public constructor(service: MyService) {
+     *         this.service = service;
+     *     }
+     * }
      */
     export function ConstructorInject<TFunction extends Function>(target: TFunction): TFunction|void;
+
+    /**
+     * Override factory method in constructor arguments for injected instance. You still need to apply @ConstructorInject decorator at top of the class
+     * @param method Factory method
+     * @example
+     * @ConstructorInject
+     * Class MyClass {
+     *     private service: MyService;
+     *     public constructor(@ConstructorInject(FactoryMethod.SINGLETON) service: MyService) {
+     *         this.service = service;
+     *     }
+     * }
+     */
+    export function ConstructorInject(method: FactoryMethod);
+
+    /**
+     * Resolve instance by string definition and pass to constructor argument
+     * @param literal string definition
+     * @param method Optional factory method
+     * @example
+     * @ConstructorInject
+     * Class MyClass {
+     *     private service: MyService;
+     *     private anotherService: AnotherService;
+     *
+     *     private tokenStr: string;
+     *
+     *     public constructor(
+     *         service: MyService,
+     *         @ConstructorInject('service', FactoryMethod.SINGLETON) anotherService: AnotherService,
+     *         @ConstructorInject('serviceToken') token: string
+     *     ) {
+     *         this.service = service;
+     *         this.anotherService = anotherService;
+     *         this.tokenStr = token;
+     *     }
+     * }
+     */
+    export function ConstructorInject(literal: string, method?: FactoryMethod);
 }

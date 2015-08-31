@@ -76,7 +76,7 @@ It may be used to override default factory method used when instantiating object
 // Just register class in container
 container.register(MyClass);
 
-// Register constructor arguments with class
+// Register constructor arguments with class. Useful when instantiating external library objects
 container.register(MyInterfaceImplementation, ['param1', 'value1']);
 
 // Register class to interface. Constructor arguments from previous registration will be passed when resolving MyInterface as well
@@ -207,13 +207,19 @@ You can specify dependencies by using decorators:
 @Inject
 // Use at top of class property. Same as @Inject but specifies factory method to resolve
 @Inject(method: FactoryMethod);
+// Use at top of class property. Resolves by string definition. Optional pass the factory method
+@Inject(literal: string, method?: FactoryMethod)
 // Use at top of class definition. Takes dependencies from constructor arguments
 @ConstructorInject
+// Use before constructor argument. Override factory method for single argument
+@ConstructorInject(method: FactoryMethod)
+// Use before constructor argument. Resolves argument by string literal. Optionally takes the factory method
+@ConstructorInject(string: literal, method?: FactoryMethod)
 ```
 
 *Note*: @Inject() and @Inject are not same
 
-**Important**: You can combine both property and constructor style injection, but do not use ordinary constructor arguments when using constructor injection.
+**Important**: You can combine both property and constructor style injection, but do not use ordinary constructor arguments (without @ConstructorInject('literal') when using constructor injection.
 
 That will not work!
 ```typescript
@@ -226,12 +232,26 @@ class Test {
 ```
 But that will:
 ```typescript
+container.register(Test, ['string1',10]);
 class Test {
     @Inject
     public service: MyService;
     
     public constructor(param1: string, param2: number) {
         ...
+    }
+}
+```
+
+Starting from version 1.1 you can use string literals for constructor injection too
+```typescript
+container.register('token', 'qwerty12345');
+container.register('seed', Math.random());
+
+@ConstructorInject
+class Test {
+    public constructor(service: MyService, @ConstructorInject('token') param1: string, @ConstructorInject('seed') param2: number) {
+        ....
     }
 }
 ```
@@ -259,6 +279,36 @@ class TestController1 {
 }
 ```
 Here the service1 and service2 are being resolved by constructor injection and service3 and service4 are resolved by property injection. You must have a public property to do property injection.
+
+Another complex example:
+```typescript
+@ConstructorInject
+class TestController2 {
+    private service1: OneService;
+    private service2: SecondService;
+    private secret: string;
+    
+    @Inject(FactoryMethod.SINGLETON)
+    public service3: ThirdService
+    
+    @Inject('db', FactoryMethod.SINGLETON)
+    public db: DbWrapper;
+    
+    @Inject('controllerToken')
+    public controllerToken: string;
+    
+    public constructor(
+        service1: OneService,
+        @ConstructorInject(FactoryMethod.SINGLETON) service2: SecondService,
+        @ConstructorInject('secretkey') secret: string
+    ) {
+       this.service1 = service1;
+       this.service2 = service2;
+       this.secret = secret;
+    }
+}
+```
+
 The @Inject(FactoryMethod) syntax is used to override factory method for inject property. These objects will be equal:
 ```typescript
 @Inject(FactoryMethod.SINGLETON)
