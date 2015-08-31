@@ -11,6 +11,11 @@ This DI container supports:
 * Property and constructor dependencies autowiring
 * Simple API, just 3 methods to go
 
+## Installation
+```
+npm install huject --save
+```
+
 ## API
 This library is intended to use only with typescript **1.5+** and **--emitDecoratorMetadata** flag enabled. Do not use it with just Javascript
 
