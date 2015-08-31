@@ -282,7 +282,7 @@ Also the service classes should be registered in container first. If any constru
  container.register(SecondService, ['param1', 'param2', true]);
  ```
  
-You can change this param by setting **container.setAllowUnregisteredResolving(true)** so you don't need to do simple container.register(class) registration:
+You can change this behavior by setting **container.setAllowUnregisteredResolving(true)** so you don't need to do simple container.register(class) registration:
 
  ```typescript
 import {OneService} from 'FirstService';
