@@ -1,6 +1,6 @@
 {
   "name": "huject",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Typescript dependency injection container for humans",
   "main": "./src/index.js",
   "scripts": {
@@ -12,6 +12,9 @@
     "di",
     "dependencyinjection"
   ],
+  "typescript": {
+    "definition": "huject.d.ts"
+  },
   "author": {
     "name": "Alexey Svetliakov",
     "email": "devpieron@gmail.com"

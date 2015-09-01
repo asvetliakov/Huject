@@ -16,17 +16,25 @@ This DI container supports:
 npm install huject --save
 ```
 
+### Install typescript definition
+```
+tsd link # will update your tsd.d.ts file
+```
+
+or directly include
+```typescript
+/// <reference path="node_modules/huject/huject.d.ts" />
+```
+
 ## API
 This library is intended to use only with typescript **1.5+** and **--emitDecoratorMetadata** flag enabled. Do not use it with just Javascript
 
 ### Initialization
 To use the the library you need to create new Container object. Do it in one place, perhaps in application bootstrap file
 ```typescript
-/// <reference path="node_modules/huject/huject.d.ts" />
 import {Container} from 'huject'
 let container = new Container();
 ```
-Do not to forgot to specify reference path
 
 ### container.register() method
 ```typescript
@@ -48,9 +56,9 @@ register<T>(interfaceDefinition: Instantiable<T>, implementationDefinition: Inst
   * @param classDefinition Class definition
   * @param object Object
   */
-register<T>(classDefinition, object: Object): Definition;
+register<T>(classDefinition: Instantiable<T>, object: Object): Definition;
 /**
-  * Bind class definition to string. Object could be later instantiated by resolve('symbol');
+  * Bind class definition to string definition. Object could be later instantiated by resolve('symbol');
   * @param symbolDefinition String
   * @param classDefinition Class definition
   * @param constructorArguments Optional array of constructor arguments
@@ -136,7 +144,8 @@ container.registerCallable(MyServiceInterface, () => {
 });
 // Assign class to string definition
 container.registerCallable('db', () => {
-return new DBWrapper(container.get('host'), container.get('username'), ...);
+    return new DBWrapper(container.get('host'), container.get('username'), ...);
+);
 ```
 
 ### container.resolve() method
@@ -218,8 +227,8 @@ You can specify dependencies by using decorators:
 @ConstructorInject
 // Use before constructor argument. Override factory method for single argument
 @ConstructorInject(method: FactoryMethod)
-// Use before constructor argument. Resolves argument by string literal. Optionally takes the factory method
-@ConstructorInject(string: literal, method?: FactoryMethod)
+// Use before constructor argument. Resolves argument by string definition. Optionally takes the factory method
+@ConstructorInject(literal: string, method?: FactoryMethod)
 ```
 
 *Note*: @Inject() and @Inject are not same
@@ -285,7 +294,7 @@ class TestController1 {
 ```
 Here the service1 and service2 are being resolved by constructor injection and service3 and service4 are resolved by property injection. You must have a public property to do property injection.
 
-Another complex example:
+Another a slight complex example:
 ```typescript
 @ConstructorInject
 class TestController2 {

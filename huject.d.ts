@@ -1,4 +1,4 @@
-declare module "huject" {
+declare module Huject {
     interface ContainerStatic {
         new(): ContainerImpl;
     }
@@ -22,10 +22,10 @@ declare module "huject" {
          * @param classDefinition Class definition
          * @param object Object
          */
-        register<T>(classDefinition, object: Object): Definition;
+        register<T>(classDefinition: Instantiable<T>, object: Object): Definition;
 
         /**
-         * Bind class definition to string. Object could be later instantiated by resolve('symbol');
+         * Bind class definition to string definition. Object could be later instantiated by resolve('symbol');
          * @param symbolDefinition String
          * @param classDefinition Class definition
          * @param constructorArguments Optional array of constructor arguments
@@ -103,7 +103,7 @@ declare module "huject" {
     export function Inject(method: FactoryMethod);
 
     /**
-     * Property injection by string literal. Literal should be registered with container.register('literal',...); before using
+     * Property injection by string definition. Literal should be registered with container.register('literal',...); before using
      * @param literal String literal
      * @param method Optional factory method
      * @example
@@ -182,4 +182,8 @@ declare module "huject" {
      * }
      */
     export function ConstructorInject(literal: string, method?: FactoryMethod);
+}
+
+declare module "huject" {
+    export = Huject;
 }

@@ -1,3 +1,6 @@
+# Version 1.1.2
+Spelling fixes and minor fixes in typing file
+
 # Version 1.1
 ## Features
 @Inject and @ConstructorInject supports resolving by string definition
