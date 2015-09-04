@@ -229,6 +229,9 @@ You can specify dependencies by using decorators:
 @ConstructorInject(method: FactoryMethod)
 // Use before constructor argument. Resolves argument by string definition. Optionally takes the factory method
 @ConstructorInject(literal: string, method?: FactoryMethod)
+// Use before class property/constructor argument with either @Inject or @ConstructorInject. Specified optional (non-strict) resolution
+// If dependency wasn't found then leave original value (for property injection) or pass null (for constructor injection)
+@Optional
 ```
 
 *Note*: @Inject() and @Inject are not same
@@ -269,6 +272,44 @@ class Test {
     }
 }
 ```
+
+Starting from version 1.2 you can specify @Optional dependencies. That means if dependency wasn't found then don't throw an error and pass null or leave default value instead:
+```typescript
+import {Optional} from 'huject';
+
+@ConstructorInject
+class Test {
+    public constructor(
+        service: MyService, 
+        @Optional @ConstructorInject('token') param1: string, 
+        @Optional @ConstructorInject('seed') param2: number)
+    {
+        if (param1 !== null) {
+            ....
+        }
+        ....
+    }
+}
+```
+
+This is very useful for property injection and default configuration:
+```typescript
+import {Optional, Inject} from 'huject';
+
+container.register('classToken', 'mytoken');
+
+class Test {
+    @Optional
+    @Inject('classToken')
+    public classParam1: string = "default string";
+    
+    @Optional
+    @Inject('servicePort')
+    public port: number = 80;
+}
+```
+Here classParam1 will be replaced with 'classToken' but port will contain original value
+
 
 
 **Examples**:
