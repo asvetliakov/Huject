@@ -46,7 +46,7 @@ export function ConstructorInject(targetOrFactoryMethodOrLiteral: any, factoryMe
 /**
  * Decorator for class property injection
  */
-export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactoryMethod?: string|symbol|FactoryMethod) {
+export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactoryMethod?: string|symbol|FactoryMethod): any {
     // means use default value or take from definition
     let method: FactoryMethod = undefined;
     // Because @Inject() and @Inject will be different
@@ -102,5 +102,31 @@ export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactory
                 Reflect.defineMetadata("inject:property", method, target, propertyKey);
             };
             break;
+    }
+}
+
+/**
+ * Specifies optional resolution (Don't throw error if not found)
+ * @param args
+ * @constructor
+ */
+export function Optional(...args: any[]): any {
+    let target;
+    switch (args.length) {
+        // Property @Optional
+        case 2:
+            target = args[0];
+            let propertyKey = args[1];
+            Reflect.defineMetadata("inject:property:optional", true, target, propertyKey);
+            break;
+        // Constructor @Optional
+        case 3:
+            target = args[0];
+            let parameterIndex = args[2];
+            let metadataName = 'inject:constructor:param' + parameterIndex + ':optional';
+            Reflect.defineMetadata(metadataName, true, target);
+            break;
+        default:
+            throw new Error("@Optional decorator is not allowed here");
     }
 }

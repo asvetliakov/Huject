@@ -195,7 +195,20 @@ export class Container {
                         dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
                     }
 
-                    resolvedDeps.push(this.resolve(dep, method));
+                    let resolvedDep;
+                    try {
+                        resolvedDep = this.resolve(dep, method);
+                    } catch (e) {
+                        // Pass null if @Optional
+                        if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':optional', constructor)) {
+                            resolvedDep = null;
+                        } else {
+                            // Rethrow
+                            throw e;
+                        }
+                    }
+
+                    resolvedDeps.push(resolvedDep);
                 }
             }
             constructorArguments = resolvedDeps;
@@ -231,8 +244,15 @@ export class Container {
                     // Resolve property by typehint
                     paramDefinition = Reflect.getMetadata('design:type', object, key);
                 }
-                let resolvedObj = this.resolve(paramDefinition, method);
-                object[key] = resolvedObj;
+                let resolvedObj;
+                try {
+                    resolvedObj = this.resolve(paramDefinition, method);
+                    object[key] = resolvedObj;
+                } catch (e) {
+                    if (!Reflect.hasMetadata('inject:property:optional', object, key)) {
+                        throw e;
+                    }
+                }
             }
         }
     }

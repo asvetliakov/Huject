@@ -8,4 +8,5 @@ exports.FactoryMethod = definition_1.FactoryMethod;
 var decorators_1 = require('./decorators');
 exports.ConstructorInject = decorators_1.ConstructorInject;
 exports.Inject = decorators_1.Inject;
+exports.Optional = decorators_1.Optional;
 //# sourceMappingURL=index.js.map

@@ -1,4 +1,4 @@
-import {ServiceInterface} from 'ServiceInterface';
+import {ServiceInterface} from './ServiceInterface';
 
 export class FirstService implements ServiceInterface {
     public say():string {

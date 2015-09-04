@@ -177,6 +177,38 @@ var ConstructorInjectionWithFactory = (function () {
     ], ConstructorInjectionWithFactory);
     return ConstructorInjectionWithFactory;
 })();
+var ConstructorInjectionOptional = (function () {
+    function ConstructorInjectionOptional(service, num) {
+        this.test = service;
+        this.num = num;
+    }
+    ConstructorInjectionOptional = __decorate([
+        decorators_1.ConstructorInject,
+        __param(0, decorators_1.ConstructorInject(definition_1.FactoryMethod.SINGLETON)),
+        __param(0, decorators_1.Optional),
+        __param(1, decorators_1.Optional),
+        __param(1, decorators_1.ConstructorInject('nonexist')), 
+        __metadata('design:paramtypes', [TestInterface, Number])
+    ], ConstructorInjectionOptional);
+    return ConstructorInjectionOptional;
+})();
+var PropertyInjectionOptional = (function () {
+    function PropertyInjectionOptional() {
+        this.str = "default";
+        this.num = 25;
+    }
+    __decorate([
+        decorators_1.Inject('nonexiststring'),
+        decorators_1.Optional, 
+        __metadata('design:type', String)
+    ], PropertyInjectionOptional.prototype, "str");
+    __decorate([
+        decorators_1.Inject('nonexistnumber'),
+        decorators_1.Optional, 
+        __metadata('design:type', Number)
+    ], PropertyInjectionOptional.prototype, "num");
+    return PropertyInjectionOptional;
+})();
 describe("Testing container's autowiring by using decorators", function () {
     var container;
     beforeEach(function () {
@@ -233,6 +265,19 @@ describe("Testing container's autowiring by using decorators", function () {
             });
         });
     });
+    describe("When constructor argument have @Optional decorator", function () {
+        var spy, constructorSpy;
+        beforeEach(function () {
+            container.register(ConstructorInjectionOptional);
+            spy = sinon.spy(container, 'resolve');
+        });
+        it("Should pass null if argument couldn't be resolved", function () {
+            var impl;
+            impl = container.resolve(ConstructorInjectionOptional);
+            (impl.test === null).should.be.true;
+            (impl.num === null).should.be.true;
+        });
+    });
     it("Should do property injection for any deps in chain", function () {
         container.register(TestInterface, TestImplementationWithParamInject);
         container.register(AnotherService);
@@ -252,6 +297,18 @@ describe("Testing container's autowiring by using decorators", function () {
         global.should.exist(impl.service.deepService);
         (impl.service instanceof AnotherService).should.be.true;
         (impl.serviceInterface instanceof TestImplementationWithParamInject).should.be.true;
+    });
+    describe("When property injection has @Optional decorator", function () {
+        var containerSpy;
+        beforeEach(function () {
+            container.register(PropertyInjectionOptional);
+            containerSpy = sinon.spy(container, 'resolve');
+        });
+        it("Should leave property original specified value", function () {
+            var impl = container.resolve(PropertyInjectionOptional);
+            impl.num.should.be.equal(25);
+            impl.str.should.be.equal("default");
+        });
     });
     describe("When factory method is specified with property injection", function () {
         beforeEach(function () {

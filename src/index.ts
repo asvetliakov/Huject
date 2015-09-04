@@ -4,6 +4,6 @@
 
 export {Container} from './container';
 export {FactoryMethod} from './definition';
-export {ConstructorInject, Inject} from './decorators';
+export {ConstructorInject, Inject, Optional} from './decorators';
 
 

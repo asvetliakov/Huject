@@ -182,6 +182,41 @@ declare module Huject {
      * }
      */
     export function ConstructorInject(literal: string, method?: FactoryMethod);
+
+    /**
+     * Specify that property injection should be optional. That means if dependency couldn't be resolved, then leave original specified value
+     * @param target
+     * @param propertyKey
+     * @example
+     * class MyClass {
+     *     @Optional
+     *     @Inject('coolnumber')
+     *     public num: number = 50;
+     *
+     *     @Optional
+     *     @Inject('classToken')
+     *     public token: string = 'defaultToken';
+     * }
+     */
+    export function Optional(target: Object, propertyKey: string|symbol): void;
+
+    /**
+     * Specify that constructor argument injection should be optional. If argument couldn't be resolved, pass null instead
+     * @param target
+     * @param propertyKey
+     * @param parameterIndex
+     * @example
+     * @ConstructorInject
+     * Class MyClass {
+     *     private service: MyService;
+     *     public constructor(@Optional @ConstructorInject(FactoryMethod.SINGLETON) service: MyService) {
+     *         if (service) {
+     *             this.service = service;
+     *         }
+     *     }
+     * }
+     */
+    export function Optional(target: Object, propertyKey: string|symbol, parameterIndex: number);
 }
 
 declare module "huject" {

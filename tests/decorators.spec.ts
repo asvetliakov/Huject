@@ -1,6 +1,6 @@
 import './bootstrap';
 
-import {ConstructorInject, Inject} from '../src/decorators';
+import {ConstructorInject, Inject, Optional} from '../src/decorators';
 import {Container} from '../src/container';
 import {FactoryMethod} from '../src/definition';
 
@@ -136,6 +136,30 @@ class ConstructorInjectionWithFactory {
     }
 }
 
+@ConstructorInject
+class ConstructorInjectionOptional {
+    public test: TestInterface;
+    public num: number;
+
+    public constructor(
+        @ConstructorInject(FactoryMethod.SINGLETON) @Optional service: TestInterface,
+        @Optional @ConstructorInject('nonexist') num: number
+    ) {
+        this.test = service;
+        this.num = num;
+    }
+}
+
+class PropertyInjectionOptional {
+    @Inject('nonexiststring')
+    @Optional
+    public str: string = "default";
+
+    @Inject('nonexistnumber')
+    @Optional
+    public num: number = 25;
+}
+
 describe("Testing container's autowiring by using decorators", function () {
     let container: Container;
     beforeEach(function () {
@@ -199,6 +223,20 @@ describe("Testing container's autowiring by using decorators", function () {
         });
     });
 
+    describe("When constructor argument have @Optional decorator", () => {
+        let spy, constructorSpy;
+        beforeEach(() => {
+            container.register(ConstructorInjectionOptional);
+            spy = sinon.spy(container, 'resolve');
+        });
+        it("Should pass null if argument couldn't be resolved", () => {
+            let impl: ConstructorInjectionOptional;
+            impl = container.resolve(ConstructorInjectionOptional);
+            (impl.test === null).should.be.true;
+            (impl.num === null).should.be.true;
+        });
+    });
+
     it("Should do property injection for any deps in chain", function () {
         container.register(TestInterface, TestImplementationWithParamInject);
         container.register(AnotherService);
@@ -223,6 +261,19 @@ describe("Testing container's autowiring by using decorators", function () {
 
         (impl.service instanceof AnotherService).should.be.true;
         (impl.serviceInterface instanceof TestImplementationWithParamInject).should.be.true;
+    });
+
+    describe("When property injection has @Optional decorator", () => {
+        let containerSpy;
+        beforeEach(() => {
+            container.register(PropertyInjectionOptional);
+            containerSpy = sinon.spy(container, 'resolve');
+        });
+        it("Should leave property original specified value", () => {
+            let impl: PropertyInjectionOptional = container.resolve(PropertyInjectionOptional);
+            impl.num.should.be.equal(25);
+            impl.str.should.be.equal("default");
+        });
     });
 
     describe("When factory method is specified with property injection", function () {

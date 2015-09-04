@@ -98,4 +98,34 @@ function Inject(targetOrFactoryMethodOrLiteral, propertyKeyOrFactoryMethod) {
     }
 }
 exports.Inject = Inject;
+/**
+ * Specifies optional resolution (Don't throw error if not found)
+ * @param args
+ * @constructor
+ */
+function Optional() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i - 0] = arguments[_i];
+    }
+    var target;
+    switch (args.length) {
+        // Property @Optional
+        case 2:
+            target = args[0];
+            var propertyKey = args[1];
+            Reflect.defineMetadata("inject:property:optional", true, target, propertyKey);
+            break;
+        // Constructor @Optional
+        case 3:
+            target = args[0];
+            var parameterIndex = args[2];
+            var metadataName = 'inject:constructor:param' + parameterIndex + ':optional';
+            Reflect.defineMetadata(metadataName, true, target);
+            break;
+        default:
+            throw new Error("@Optional decorator is not allowed here");
+    }
+}
+exports.Optional = Optional;
 //# sourceMappingURL=decorators.js.map
