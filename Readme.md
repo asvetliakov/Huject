@@ -506,7 +506,7 @@ let controller = container.resolve(MyController);
 ```
 would give you 'Undefined ServiceInterface error';
 
-### Use new typescript 1.6 abstract classes
+### Use new typescript 1.6 abstract classes (That is the best method i think)
 Since you can't instantiate abstract classes you can safely enable *container.setAllowUnregisteredResolving(true)*:
 
 ```typescript
@@ -535,6 +535,58 @@ container.register(MyController); // forgot to bind ServiceInterface to MyServic
 
 let controller = container.resolve(MyController); // Error here. Cann't instantiate abstract ServiceInterface class
 ```
+**Note**: Any abstract methods will be omitted when compiling to JS. I'd suggest you to use empty function body {} and avoid use abstract method(), in *abstracted interfaces* but the choice is up to you. That doesn't impact any container functionality but impacts testing:
+
+```typescript
+abstract class ServiceInterface {
+   public abstract method1(): void;
+}
+
+@ConstructorInject
+class Controller {
+   private service: ServiceInterface;
+   public constructor(service: ServiceInterface) {
+      this.service = service;
+   }
+   
+   public test(): void {
+       this.service.method1();
+   }
+}
+// in test.ts
+
+let myMock = sinon.createStubInstance(ServiceInterface);
+let controller = new Controller(myMock);
+controller.test(); // Error
+```
+
+The compiler will omit method1() from compiled JS file if method was declared as abstract. That affects the testing. 
+```typescript
+abstract class ServiceInterface {
+   public method1(): void {}; // empty function body instead of abstract
+}
+
+@ConstructorInject
+class Controller {
+   private service: ServiceInterface;
+   public constructor(service: ServiceInterface) {
+      this.service = service;
+   }
+   
+   public test(): void {
+       this.service.method1();
+   }
+}
+// in test.ts
+
+let myMock = sinon.createStubInstance(ServiceInterface);
+let controller = new Controller(myMock);
+controller.test(); // OK since there was method1() emitted by compiler for service interface prototype
+myMock.method1.should.have.been.called; // OK
+```
+
+This may looks weird though, so it's up to you which method to use. As i said it didn't affect any container functionality but might be useful for creating testing mocks/stubs.
+
 
 ## Example
 In example/ directory you can see completely working DI example. To build you need to run grunt first
