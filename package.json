@@ -1,6 +1,6 @@
 {
   "name": "huject",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Typescript dependency injection container for humans",
   "main": "./src/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "sinon": "^1.16.1",
     "sinon-chai": "^2.8.0",
     "source-map-support": "^0.3.2",
-    "typescript": "^1.5.3"
+    "typescript": "^1.6.0-beta"
   },
   "dependencies": {
     "es6-collections": "^0.5.5",

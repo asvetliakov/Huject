@@ -7,19 +7,7 @@
     "sourceMap": true,
     "experimentalDecorators": true
   },
-  "files": [
-    "src/container.ts",
-    "src/decorators.ts",
-    "src/definition.ts",
-    "src/index.ts",
-    "tests/bootstrap.ts",
-    "tests/container.spec.ts",
-    "tests/decorators.spec.ts",
-    "example/bootstrap.ts",
-    "example/DeepService.ts",
-    "example/FirstService.ts",
-    "example/main.ts",
-    "example/SecondService.ts",
-    "example/ServiceInterface.ts"
+  "exclude": [
+    "node_modules"
   ]
 }

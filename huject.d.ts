@@ -1,28 +1,36 @@
 declare module Huject {
-    interface ContainerStatic {
-        new(): ContainerImpl;
-    }
 
-    interface ContainerImpl {
+    class Container {
+        /**
+         * @constructor
+         */
+        constructor();
+
+        /**
+         * Allow to unregistered definitions be registered and resolved automatically. If false then each class should be explicitly registered in container
+         * @param allow true to allow, false to disable
+         */
+        setAllowUnregisteredResolving(allow: boolean): void;
+
         /**
          * Register class definition
          * @param classDefinition Class definition
          * @param constructorArguments Optional array of constructor arguments. They will be passed to constructor when object will be instantiated
          */
-        register<T>(classDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+        register(classDefinition: Function, constructorArguments?: Array<any>): Definition;
         /**
          * Bind class to another class (interface)
          * @param interfaceDefinition An interface to bind to
          * @param implementationDefinition Class definition
          * @param constructorArguments Optional array of constructor arguments
          */
-        register<T>(interfaceDefinition: Instantiable<T>, implementationDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+        register(interfaceDefinition: Function, implementationDefinition: Function, constructorArguments?: Array<any>): Definition;
         /**
          * Bind pre-created object to class definition. The object will be used when defined class is instantiated
          * @param classDefinition Class definition
          * @param object Object
          */
-        register<T>(classDefinition: Instantiable<T>, object: Object): Definition;
+        register(classDefinition: Function, object: Object): Definition;
 
         /**
          * Bind class definition to string definition. Object could be later instantiated by resolve('symbol');
@@ -30,7 +38,7 @@ declare module Huject {
          * @param classDefinition Class definition
          * @param constructorArguments Optional array of constructor arguments
          */
-        register<T>(symbolDefinition: string, classDefinition: Instantiable<T>, constructorArguments?: Array<any>): Definition;
+        register(symbolDefinition: string, classDefinition: Function, constructorArguments?: Array<any>): Definition;
         /**
          * Bind object to string definition
          * @param symbolDefinition String
@@ -43,30 +51,26 @@ declare module Huject {
          * @param classDefinition Class definition
          * @param callable Callable
          */
-        registerCallable<T>(classDefinition: Instantiable<T>, callable: () => T): Definition;
+        registerCallable(classDefinition: Function, callable: () => Object|Function): Definition;
         /**
          * Bind callable function to string definition. Instead creating new object the function result will be used instead
          * @param symbolDefinition String definition
          * @param callable Callable
          */
-        registerCallable<T>(symbolDefinition: string, callable: () => T): Definition;
+        registerCallable(symbolDefinition: string, callable: () => Object|Function): Definition;
 
         /**
          * Resolve (instantiate) object from container. Will resolve all wired dependencies if they were specified by decorators
          * @param definition Class definition
          * @param method Factory method. Used to override definition method only for this instantiation
          */
-        resolve<T>(definition: Instantiable<T>, method?: FactoryMethod): T;
+        resolve(definition: Function, method?: FactoryMethod): any;
         /**
          * Resolve {instantiate} object from container by string definition. Will resolve all wired dependencies if they were specified by decorators
          * @param definition Class definition
          * @param method Factory method. Used to override definition method only for this instantiation
          */
         resolve(definition: string, method?: FactoryMethod): any;
-    }
-
-    interface Instantiable<T> {
-        new(...args: Array<any>): T;
     }
 
     interface Definition {
@@ -89,7 +93,6 @@ declare module Huject {
         OBJECT
     }
 
-    export var Container: ContainerStatic;
 
     /**
      * Property injection
