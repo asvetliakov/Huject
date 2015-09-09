@@ -503,7 +503,7 @@ let controller = container.resolve(MyController);
 ```
 would give you 'Undefined ServiceInterface error';
 
-**Note** Ordinary or abstract class doesn't matter from runtime perspective. As of version 1.6.0-beta typescript compiler doesn't omit any runtime checks to avoid creation abstract classes at runtime. That could be changed later though.
+**Note** Ordinary or abstract class doesn't matter from runtime perspective. As of version 1.6.0-beta typescript compiler doesn't emit any runtime checks to avoid creation abstract classes at runtime. That could be changed later though.
 
 **Note**: Any abstract methods will be omitted when compiling to JS. I'd suggest you to use empty function body {} and avoid use abstract method(), if you're using abstract classes as interfaces but the choice is up to you. That doesn't impact any container functionality but impacts testing:
 
