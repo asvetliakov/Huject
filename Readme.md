@@ -433,13 +433,13 @@ let controller = container.resolve(MyController); //error
 ```
 but you can't. There is no enough runtime information for interfaces so ServiceInterface will be just empty Object and resolve lookup will fail.
 
-Here you can have 2 ways to workaround this problem:
+Here you can have only one way to workaround this problem:
 
-### Use class as interface
+### Use class or (abstract class) as interface
 You can write class instead interface:
 ```typescript
 
-// Just use class keyword
+// Just use class or abstract class keywords
 class ServiceInterface {
     public method1(): void {}; // add empty method body
     public method2(num: number): string {}; // add empty method body
@@ -503,36 +503,9 @@ let controller = container.resolve(MyController);
 ```
 would give you 'Undefined ServiceInterface error';
 
-### Use new typescript 1.6 abstract classes (That is the best method i think)
-Since you can't instantiate abstract classes you can safely enable *container.setAllowUnregisteredResolving(true)*:
+**Note** Ordinary or abstract class doesn't matter from runtime perspective. As of version 1.6.0-beta typescript compiler doesn't omit any runtime checks to avoid creation abstract classes at runtime. That could be changed later though.
 
-```typescript
-abstract class ServiceInterface {
-    public method1(): void {}; 
-    public method2(num: number): string {}; 
-}
-
-class MyService implements ServiceInterface {
-    public method1(): void {
-        ...
-    }
-    public method2(num: number): string {
-        ...
-    }
-}
-
-class MyController {
-// or similar constructor injection
-    @Inject
-    public service: ServiceInterface
-}
-
-container.setAllowUnregisteredResolving(true);
-container.register(MyController); // forgot to bind ServiceInterface to MyService here
-
-let controller = container.resolve(MyController); // Error here. Cann't instantiate abstract ServiceInterface class
-```
-**Note**: Any abstract methods will be omitted when compiling to JS. I'd suggest you to use empty function body {} and avoid use abstract method(), in *abstracted interfaces* but the choice is up to you. That doesn't impact any container functionality but impacts testing:
+**Note**: Any abstract methods will be omitted when compiling to JS. I'd suggest you to use empty function body {} and avoid use abstract method(), if you're using abstract classes as interfaces but the choice is up to you. That doesn't impact any container functionality but impacts testing:
 
 ```typescript
 abstract class ServiceInterface {
@@ -557,7 +530,7 @@ let controller = new Controller(myMock);
 controller.test(); // Error
 ```
 
-The compiler will omit method1() from compiled JS file if method was declared as abstract. That affects the testing. 
+The compiler will omit method1() from compiled JS file if method was declared as abstract and your stub will not have correct method 
 ```typescript
 abstract class ServiceInterface {
    public method1(): void {}; // empty function body instead of abstract
