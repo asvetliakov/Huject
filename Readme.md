@@ -14,6 +14,9 @@ This DI container supports:
 * Injecting container as factory (**new** 1.3 version)
 * Auto-Creating object factories! (**new** 1.3 version)
 
+## Todo
+* Lazy injection
+
 ## Installation
 ```
 npm install huject --save
@@ -449,9 +452,8 @@ Interface is simple:
 
 By using decorators and typehints you can tell container to create factory for you:
 
-import {Factory} From 'huject'
-
 ```typescript
+import {Factory} From 'huject'
 
 class MyModel {
     public constructor(num?: number) {
@@ -485,8 +487,8 @@ class Controller {
     public factory: CoolFactory;
     
     public method(): void {
-        let myModel = factory.createModel(40);  // Call factory inherited method
-        let anotherModel = factory.createAnotherModel();
+        let myModel = this.factory.createModel(40);  // Call factory inherited method
+        let anotherModel = this.factory.createAnotherModel();
         ...
     }
 }
@@ -622,7 +624,7 @@ class Controller {
 }
 // in test.ts
 
-let myMock = sinon.createStubInstance(ServiceInterface);
+let myMock: ServiceInterface = <any> sinon.createStubInstance(ServiceInterface);
 let controller = new Controller(myMock);
 controller.test(); // Error
 ```
@@ -646,7 +648,7 @@ class Controller {
 }
 // in test.ts
 
-let myMock = sinon.createStubInstance(ServiceInterface);
+let myMock: ServiceInterface = <any> sinon.createStubInstance(ServiceInterface);
 let controller = new Controller(myMock);
 controller.test(); // OK since there was method1() emitted by compiler for service interface prototype
 myMock.method1.should.have.been.called; // OK
