@@ -1,6 +1,6 @@
 declare module Huject {
 
-    class Container {
+    export class Container {
         /**
          * @constructor
          */
@@ -72,6 +72,21 @@ declare module Huject {
          */
         resolve(definition: string, method?: FactoryMethod): any;
     }
+
+
+    /**
+     * Interface for creating objects from container dynamically
+     */
+    export class ContainerFactoryInterface {
+        /**
+         * Create object using the container. Will create new instance for each call
+         * @param definition Class or string definition
+         * @param constructorArgs Optional constructor arguments. Overrides constructor arguments in definition
+         */
+        public make<T extends Function>(definition: T, constructorArgs?: Array<any>): T;
+        public make(definition: string, constructorArgs?: Array<any>): any;
+    }
+
 
     interface Definition {
         /**

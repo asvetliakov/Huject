@@ -130,3 +130,26 @@ export function Optional(...args: any[]): any {
             throw new Error("@Optional decorator is not allowed here");
     }
 }
+
+/**
+ * Decorator for creating auto-factories
+ */
+export function Factory(...args: any[]): any {
+    let target;
+
+    switch (args.length) {
+        case 1:
+            target = args[0];
+            Reflect.defineMetadata('inject:autofactory', true, target);
+            return target;
+            break;
+        case 3:
+            target = args[0];
+            let propertyKey = args[1];
+            Reflect.defineMetadata('inject:factorymethod', true, target, propertyKey);
+            return args[2];
+            break;
+        default:
+            throw new Error("@Factory decorator is not allowed here");
+    }
+}

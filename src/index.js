@@ -9,4 +9,6 @@ var decorators_1 = require('./decorators');
 exports.ConstructorInject = decorators_1.ConstructorInject;
 exports.Inject = decorators_1.Inject;
 exports.Optional = decorators_1.Optional;
+var containerfactoryinterface_1 = require('./containerfactoryinterface');
+exports.ContainerFactoryInterface = containerfactoryinterface_1.ContainerFactoryInterface;
 //# sourceMappingURL=index.js.map

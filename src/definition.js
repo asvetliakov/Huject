@@ -48,6 +48,9 @@ var Definition = (function () {
      * @return {Definition}
      */
     Definition.prototype.as = function (method) {
+        if (this.method == FactoryMethod.OBJECT) {
+            throw new Error("You're trying to override factory method for object");
+        }
         this.method = method;
         return this;
     };
