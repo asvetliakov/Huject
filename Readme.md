@@ -495,6 +495,8 @@ class Controller {
 The return type annotation is required. Also it should be only constructor function. For others types it will throw an error. The return type will be resolved by container, so autowiring is possible (properly best to use property injection for that). You can also pass constructor arguments - just define them in factory and pass when calling factory method.
 No need to pre-register neither factory or classes used to create instances by factories in container. 
 
+**Note**
+It'a bad practice generally to inject something into business models.
 
 
 ## Typescript interfaces and implementation->interface binding
