@@ -235,6 +235,32 @@ declare module Huject {
      * }
      */
     export function Optional(target: Object, propertyKey: string|symbol, parameterIndex: number);
+
+    /**
+     * Specify that class should be base for auto-factory
+     * @param target
+     * @example
+     * @Factory
+     * class MyModelFactory {
+     *     @Factory
+     *     public createModel(): Model {return null;}
+     * }
+     */
+    export function Factory<TFunction extends Function>(target: TFunction): TFunction | void;
+
+    /**
+     * Specify that method should be used for auto-factory
+     * @param target
+     * @param propertyKey
+     * @param descriptor
+     * @example
+     * @Factory
+     * class MyModelFactory {
+     *     @Factory
+     *     public createModel(): Model {return null;}
+     * }
+     */
+    export function Factory<T>(target: Object, propertyKey: string|symbol, descriptor: TypedPropertyDescriptor<T>): TypedPropertyDescriptor<T> | void;
 }
 
 declare module "huject" {

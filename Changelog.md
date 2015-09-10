@@ -1,3 +1,7 @@
+# Version 1.3
+Possibility to inject ContainerFactoryInterface to access to container and create objects dynamically
+@Factory decorator to auto-create factories
+
 # Version 1.2
 @Optional decorator for constructor argument injection and property injection.
 

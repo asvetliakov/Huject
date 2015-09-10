@@ -9,7 +9,10 @@ This DI container supports:
 * Callable injection
 * Service locator pattern (register and resolve primitive, object, class or callable by string definition)
 * Property and constructor dependencies autowiring
-* Simple API, just 3 methods to go
+* Simple API, just 3 methods and few decorators to go
+* Optional injection (from version 1.2)
+* Injecting container as factory (**new** 1.3 version)
+* Auto-Creating object factories! (**new** 1.3 version)
 
 ## Installation
 ```
@@ -229,6 +232,8 @@ You can specify dependencies by using decorators:
 // Use before class property/constructor argument with either @Inject or @ConstructorInject. Specified optional (non-strict) resolution
 // If dependency wasn't found then leave original value (for property injection) or pass null (for constructor injection)
 @Optional
+// Used for creating auto factories (See below)
+@Factory
 ```
 
 *Note*: @Inject() and @Inject are not same
@@ -400,6 +405,96 @@ public service2: SecondService;
 }
 ```
 but you need to have a reference to constructor functions anyway, so i'd recommend avoid to depend on services directly and use interfaces (or class-like analogs)
+
+
+## Factories
+I'm pleased to introduce to you new feature starting from version 1.3: Auto-Factory and ContainerFactoryInterface
+
+### ContainerFactoryInterface
+
+You can now inject ContainerFactoryInterface into your service/controller and create object from container dynamically, by request:
+
+```typescript
+import {ContainerFactoryInterface} from 'huject';
+import {Model} from './Model';
+
+class MyController {
+    @Inject
+    public objectFactory: ContainerFactoryInterface;
+    
+    public method(): void {
+       let myModel = this.objectFactory.make(Model, ['param1', '50, ...]);
+       ...
+    }
+}
+```
+
+No need to pre-register ContainerFactoryInterface (unless you want to redefine it). Also objects created by this method will always have FACTORY scope (and it will return new object at each call). The object will be resolved by container so it will get all benefits from dependencies autowiring. You can also pass constructor arguments to make()
+Interface is simple:
+
+```typescript
+    export class ContainerFactoryInterface {
+        /**
+         * Create object using the container. Will create new instance for each call
+         * @param definition Class or string definition
+         * @param constructorArgs Optional constructor arguments. Overrides constructor arguments in definition
+         */
+        public make<T extends Function>(definition: T, constructorArgs?: Array<any>): T;
+        public make(definition: string, constructorArgs?: Array<any>): any;
+    }
+```
+
+
+### Auto-Factories
+
+By using decorators and typehints you can tell container to create factory for you:
+
+import {Factory} From 'huject'
+
+```typescript
+
+class MyModel {
+    public constructor(num?: number) {
+        ....
+    }
+}
+
+class AnotherModel {
+}
+
+// class name doesn't matter, don't forget to specify @Factory for both methods and class!
+@Factory
+class MyModelFactory {
+    @Factory
+    public createModel(num?: number): MyModel {return null;}  // Add something to function body to stop TS compiler complain about no function return
+    @Factory    
+    public createAnotherModel(): AnotherModel { throw new Error(); } // You can throw here to make sure too. That probably will never happen
+}
+
+// You can extend factories
+@Factory
+class CoolFactory extends MyModelFactory {
+    @Factory
+    public createCoolModel(): MyModel {return null;}
+}
+
+// Just inject factory to controller. No pre-registration needed
+
+class Controller {
+    @Inject
+    public factory: CoolFactory;
+    
+    public method(): void {
+        let myModel = factory.createModel(40);  // Call factory inherited method
+        let anotherModel = factory.createAnotherModel();
+        ...
+    }
+}
+
+```
+The return type annotation is required. Also it should be only constructor function. For others types it will throw an error. The return type will be resolved by container, so autowiring is possible (properly best to use property injection for that). You can also pass constructor arguments - just define them in factory and pass when calling factory method.
+No need to pre-register neither factory or classes used to create instances by factories in container. 
+
 
 
 ## Typescript interfaces and implementation->interface binding
