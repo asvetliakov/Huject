@@ -83,7 +83,7 @@ declare module Huject {
          * @param definition Class or string definition
          * @param constructorArgs Optional constructor arguments. Overrides constructor arguments in definition
          */
-        public make<T extends Function>(definition: T, constructorArgs?: Array<any>): T;
+        public make(definition: Function, constructorArgs?: Array<any>): any;
         public make(definition: string, constructorArgs?: Array<any>): any;
     }
 

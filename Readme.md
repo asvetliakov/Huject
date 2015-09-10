@@ -1,6 +1,6 @@
 # Typescript dependency injection for humans!
 ## Reason
-I wasn't happy with any found DI container both for Typescript and Javascript. Each was missing some required feature: one had construction injection autowiring but didn't have property injection and ability to pass ordinary constructor parameters when instantiating, other had an ability to register or pass constructor params but didn't have typescript features, etc...
+I wasn't happy with any DI container found for both Typescript and Javascript. Each was missing some required feature: one had construction injection autowiring but didn't have property injection and ability to pass ordinary constructor parameters when instantiating, other had an ability to register or pass constructor params but didn't have typescript features, etc...
 
 ## Features
 This DI container supports:
@@ -36,7 +36,7 @@ or directly include
 This library is intended to use only with typescript **1.5+** and **--emitDecoratorMetadata** flag enabled. Do not use it with just Javascript
 
 ### Initialization
-To use the the library you need to create new Container object. Do it in one place, perhaps in application bootstrap file
+To use the the library you need to create new Container object. Do it in one place, probably in application bootstrap file
 ```typescript
 import {Container} from 'huject'
 let container = new Container();
@@ -433,6 +433,7 @@ class MyController {
 ```
 
 No need to pre-register ContainerFactoryInterface (unless you want to redefine it). Also objects created by this method will always have FACTORY scope (and it will return new object at each call). The object will be resolved by container so it will get all benefits from dependencies autowiring. You can also pass constructor arguments to make()
+
 Interface is simple:
 
 ```typescript
@@ -442,7 +443,7 @@ Interface is simple:
          * @param definition Class or string definition
          * @param constructorArgs Optional constructor arguments. Overrides constructor arguments in definition
          */
-        public make<T extends Function>(definition: T, constructorArgs?: Array<any>): T;
+        public make(definition: Function, constructorArgs?: Array<any>): any;
         public make(definition: string, constructorArgs?: Array<any>): any;
     }
 ```
@@ -494,11 +495,11 @@ class Controller {
 }
 
 ```
-The return type annotation is required. Also it should be only constructor function. For others types it will throw an error. The return type will be resolved by container, so autowiring is possible (properly best to use property injection for that). You can also pass constructor arguments - just define them in factory and pass when calling factory method.
+The return type annotation is required. Also it should be only constructor function. For others types it will throw an error. The return type will be resolved by container, so autowiring is possible (probably better to use property injection for that). You can also pass constructor arguments - just define them in factory and pass when calling factory method.
+
 No need to pre-register neither factory or classes used to create instances by factories in container. 
 
-**Note**
-It'a bad practice generally to inject something into business models.
+**Note**: It'a bad practice generally to inject something into business models.
 
 
 ## Typescript interfaces and implementation->interface binding
@@ -602,7 +603,7 @@ let controller = container.resolve(MyController);
 ```
 would give you 'Undefined ServiceInterface error';
 
-**Note** Ordinary or abstract class doesn't matter from runtime perspective. As of version 1.6.0-beta typescript compiler doesn't emit any runtime checks to avoid creation abstract classes at runtime. That could be changed later though.
+**Note**: Ordinary or abstract class doesn't matter from runtime perspective. As of version 1.6.0-beta typescript compiler doesn't emit any runtime checks to avoid creation abstract classes at runtime. That could be changed later though.
 
 **Note**: Any abstract methods will be omitted when compiling to JS. I'd suggest you to use empty function body {} and avoid use abstract method(), if you're using abstract classes as interfaces but the choice is up to you. That doesn't impact any container functionality but impacts testing:
 
