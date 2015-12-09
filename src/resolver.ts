@@ -60,7 +60,7 @@ export class ContainerResolver {
      * @param strict
      */
     public resolve(definition: string|Function, method?: FactoryMethod, constructorArgs?: Array<any>, strict = true): any {
-        let internalDefinition = null;
+        let internalDefinition: Definition = null;
         // bind autofactories to factory auto proxy instance
         if (typeof definition === "function" && Reflect.hasOwnMetadata("inject:autofactory", definition)) {
             let factoryProxy = new FactoryAutoProxy(this, definition);
@@ -77,7 +77,17 @@ export class ContainerResolver {
             }
         }
 
-        let constructor = this.resolveDefinition(internalDefinition, constructorArgs, strict);
+        let constructor = this.resolveDefinition(internalDefinition);
+        let constructorArguments = [];
+
+        if (internalDefinition.definitionObjectType !== DefinitionObjectType.CALLABLE && internalDefinition.method !== FactoryMethod.OBJECT) {
+            if (typeof constructorArgs !== 'undefined' && constructorArgs.length > 0) {
+                constructorArguments = constructorArgs;
+            } else {
+                constructorArguments = this.resolveConstructorArguments(internalDefinition, constructor, strict);
+            }
+        }
+
 
         let resolveMethod = internalDefinition.method;
         if (typeof method !== "undefined" && internalDefinition.method != FactoryMethod.OBJECT) {
@@ -90,7 +100,7 @@ export class ContainerResolver {
                     if (internalDefinition.definitionObjectType == DefinitionObjectType.CALLABLE) {
                         this.singletonObjects.set(internalDefinition, constructor.call(this));
                     } else {
-                        let obj = new constructor();
+                        let obj = new constructor(...constructorArguments);
                         this.resolveProperties(obj, strict);
                         this.singletonObjects.set(internalDefinition, obj);
                     }
@@ -101,7 +111,7 @@ export class ContainerResolver {
                 if (internalDefinition.definitionObjectType == DefinitionObjectType.CALLABLE) {
                     return constructor.call(this);
                 } else {
-                    let obj = new constructor();
+                    let obj = new constructor(...constructorArguments);
                     this.resolveProperties(obj, strict);
                     return obj;
                 }
@@ -116,60 +126,12 @@ export class ContainerResolver {
      * Resolves definition
      * @private
      * @param definition
-     * @param constructorArgs
-     * @param strict
      */
-    private resolveDefinition(definition: Definition, constructorArgs?: Array<any>, strict = true): any {
+    private resolveDefinition(definition: Definition): any {
         if (definition.definitionObjectType == DefinitionObjectType.CALLABLE || definition.method == FactoryMethod.OBJECT) {
             return definition.definitionConstructor;
         }
-        let constructor = this.resolveConstructor(definition);
-
-        let constructorArguments = [];
-
-        if (typeof constructorArgs !== 'undefined' && constructorArgs.length > 0) {
-            constructorArguments = constructorArgs;
-        } else if (Reflect.hasOwnMetadata("inject:constructor", constructor)) {
-            // Resolve constructor dependencies
-            let dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
-            let resolvedDeps = [];
-            if (dependencies) {
-                for (let i = 0; i < dependencies.length; i++) {
-                    let dep = dependencies[i];
-                    let method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
-                    // Use literal for resolving if specified
-                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
-                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
-                    }
-
-                    let resolvedDep;
-                    try {
-                        resolvedDep = this.resolve(dep, method, undefined, strict);
-                    } catch (e) {
-                        if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':optional', constructor)) {
-                            resolvedDep = null;
-                        } else {
-                            throw e;
-                        }
-                    }
-
-                    resolvedDeps.push(resolvedDep);
-                }
-            }
-            constructorArguments = resolvedDeps;
-        } else {
-            // No constructor injection, lookup for constructor arguments in definition
-            constructorArguments = this.resolveConstructorArguments(definition);
-            if (!constructorArguments) {
-                constructorArguments = [];
-            }
-        }
-
-        let newConstructor = function () {
-            constructor.apply(this, constructorArguments);
-        };
-        newConstructor.prototype = constructor.prototype;
-        return newConstructor;
+        return this.resolveConstructor(definition);
     }
 
     /**
@@ -218,15 +180,61 @@ export class ContainerResolver {
     }
 
     /**
+     * Resolves constructor arguments from constructor injection or definition chain
+     * @param definition
+     * @param constructor
+     * @param strict
+     */
+    private resolveConstructorArguments(definition: Definition, constructor: Function, strict = true): Array<any> {
+        let constructorArguments = [];
+        if (Reflect.hasOwnMetadata("inject:constructor", constructor)) {
+            // Resolve constructor dependencies
+            let dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
+            let resolvedDeps = [];
+            if (dependencies) {
+                for (let i = 0; i < dependencies.length; i++) {
+                    let dep = dependencies[i];
+                    let method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
+                    // Use literal for resolving if specified
+                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
+                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
+                    }
+
+                    let resolvedDep;
+                    try {
+                        resolvedDep = this.resolve(dep, method, undefined, strict);
+                    } catch (e) {
+                        if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':optional', constructor)) {
+                            resolvedDep = null;
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    resolvedDeps.push(resolvedDep);
+                }
+            }
+            constructorArguments = resolvedDeps;
+        } else {
+            // No constructor injection, lookup for constructor arguments in definition
+            constructorArguments = this.resolveConstructorArgumentsFromDefinition(definition);
+            if (!constructorArguments) {
+                constructorArguments = [];
+            }
+        }
+        return constructorArguments;
+    }
+
+    /**
      * Resolves constructor arguments from definition chain
      * @private
      * @param definition
      * @returns {Array<any>}
      */
-    private resolveConstructorArguments(definition: Definition): Array<any> {
+    private resolveConstructorArgumentsFromDefinition(definition: Definition): Array<any> {
         let constructorArgs = definition.constructorArgs;
         if (!constructorArgs && this.definitions.has(definition.definitionConstructor) && (definition.definitionConstructor != definition.key)) {
-            constructorArgs = this.resolveConstructorArguments(this.definitions.get(definition.definitionConstructor));
+            constructorArgs = this.resolveConstructorArgumentsFromDefinition(this.definitions.get(definition.definitionConstructor));
         }
         return constructorArgs;
     }

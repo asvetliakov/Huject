@@ -1,3 +1,5 @@
+"use strict";
+
 import container from './bootstrap';
 import {ServiceInterface} from './ServiceInterface';
 import {SecondService} from './SecondService';

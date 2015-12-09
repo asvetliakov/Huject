@@ -58,7 +58,16 @@ var ContainerResolver = (function () {
                 internalDefinition = new definition_1.Definition(definition, definition);
             }
         }
-        var constructor = this.resolveDefinition(internalDefinition, constructorArgs, strict);
+        var constructor = this.resolveDefinition(internalDefinition);
+        var constructorArguments = [];
+        if (internalDefinition.definitionObjectType !== definition_2.DefinitionObjectType.CALLABLE && internalDefinition.method !== definition_2.FactoryMethod.OBJECT) {
+            if (typeof constructorArgs !== 'undefined' && constructorArgs.length > 0) {
+                constructorArguments = constructorArgs;
+            }
+            else {
+                constructorArguments = this.resolveConstructorArguments(internalDefinition, constructor, strict);
+            }
+        }
         var resolveMethod = internalDefinition.method;
         if (typeof method !== "undefined" && internalDefinition.method != definition_2.FactoryMethod.OBJECT) {
             resolveMethod = method;
@@ -70,7 +79,7 @@ var ContainerResolver = (function () {
                         this.singletonObjects.set(internalDefinition, constructor.call(this));
                     }
                     else {
-                        var obj = new constructor();
+                        var obj = new (constructor.bind.apply(constructor, [void 0].concat(constructorArguments)))();
                         this.resolveProperties(obj, strict);
                         this.singletonObjects.set(internalDefinition, obj);
                     }
@@ -82,7 +91,7 @@ var ContainerResolver = (function () {
                     return constructor.call(this);
                 }
                 else {
-                    var obj = new constructor();
+                    var obj = new (constructor.bind.apply(constructor, [void 0].concat(constructorArguments)))();
                     this.resolveProperties(obj, strict);
                     return obj;
                 }
@@ -96,60 +105,12 @@ var ContainerResolver = (function () {
      * Resolves definition
      * @private
      * @param definition
-     * @param constructorArgs
-     * @param strict
      */
-    ContainerResolver.prototype.resolveDefinition = function (definition, constructorArgs, strict) {
-        if (strict === void 0) { strict = true; }
+    ContainerResolver.prototype.resolveDefinition = function (definition) {
         if (definition.definitionObjectType == definition_2.DefinitionObjectType.CALLABLE || definition.method == definition_2.FactoryMethod.OBJECT) {
             return definition.definitionConstructor;
         }
-        var constructor = this.resolveConstructor(definition);
-        var constructorArguments = [];
-        if (typeof constructorArgs !== 'undefined' && constructorArgs.length > 0) {
-            constructorArguments = constructorArgs;
-        }
-        else if (Reflect.hasOwnMetadata("inject:constructor", constructor)) {
-            // Resolve constructor dependencies
-            var dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
-            var resolvedDeps = [];
-            if (dependencies) {
-                for (var i = 0; i < dependencies.length; i++) {
-                    var dep = dependencies[i];
-                    var method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
-                    // Use literal for resolving if specified
-                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
-                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
-                    }
-                    var resolvedDep = void 0;
-                    try {
-                        resolvedDep = this.resolve(dep, method, undefined, strict);
-                    }
-                    catch (e) {
-                        if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':optional', constructor)) {
-                            resolvedDep = null;
-                        }
-                        else {
-                            throw e;
-                        }
-                    }
-                    resolvedDeps.push(resolvedDep);
-                }
-            }
-            constructorArguments = resolvedDeps;
-        }
-        else {
-            // No constructor injection, lookup for constructor arguments in definition
-            constructorArguments = this.resolveConstructorArguments(definition);
-            if (!constructorArguments) {
-                constructorArguments = [];
-            }
-        }
-        var newConstructor = function () {
-            constructor.apply(this, constructorArguments);
-        };
-        newConstructor.prototype = constructor.prototype;
-        return newConstructor;
+        return this.resolveConstructor(definition);
     };
     /**
      * Injects properties into object
@@ -197,15 +158,62 @@ var ContainerResolver = (function () {
         return constructor;
     };
     /**
+     * Resolves constructor arguments from constructor injection or definition chain
+     * @param definition
+     * @param constructor
+     * @param strict
+     */
+    ContainerResolver.prototype.resolveConstructorArguments = function (definition, constructor, strict) {
+        if (strict === void 0) { strict = true; }
+        var constructorArguments = [];
+        if (Reflect.hasOwnMetadata("inject:constructor", constructor)) {
+            // Resolve constructor dependencies
+            var dependencies = Reflect.getOwnMetadata("design:paramtypes", constructor);
+            var resolvedDeps = [];
+            if (dependencies) {
+                for (var i = 0; i < dependencies.length; i++) {
+                    var dep = dependencies[i];
+                    var method = Reflect.getOwnMetadata('inject:constructor:param' + i + ':method', constructor);
+                    // Use literal for resolving if specified
+                    if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':literal', constructor)) {
+                        dep = Reflect.getOwnMetadata('inject:constructor:param' + i + ':literal', constructor);
+                    }
+                    var resolvedDep = void 0;
+                    try {
+                        resolvedDep = this.resolve(dep, method, undefined, strict);
+                    }
+                    catch (e) {
+                        if (Reflect.hasOwnMetadata('inject:constructor:param' + i + ':optional', constructor)) {
+                            resolvedDep = null;
+                        }
+                        else {
+                            throw e;
+                        }
+                    }
+                    resolvedDeps.push(resolvedDep);
+                }
+            }
+            constructorArguments = resolvedDeps;
+        }
+        else {
+            // No constructor injection, lookup for constructor arguments in definition
+            constructorArguments = this.resolveConstructorArgumentsFromDefinition(definition);
+            if (!constructorArguments) {
+                constructorArguments = [];
+            }
+        }
+        return constructorArguments;
+    };
+    /**
      * Resolves constructor arguments from definition chain
      * @private
      * @param definition
      * @returns {Array<any>}
      */
-    ContainerResolver.prototype.resolveConstructorArguments = function (definition) {
+    ContainerResolver.prototype.resolveConstructorArgumentsFromDefinition = function (definition) {
         var constructorArgs = definition.constructorArgs;
         if (!constructorArgs && this.definitions.has(definition.definitionConstructor) && (definition.definitionConstructor != definition.key)) {
-            constructorArgs = this.resolveConstructorArguments(this.definitions.get(definition.definitionConstructor));
+            constructorArgs = this.resolveConstructorArgumentsFromDefinition(this.definitions.get(definition.definitionConstructor));
         }
         return constructorArgs;
     };

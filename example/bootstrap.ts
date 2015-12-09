@@ -1,3 +1,5 @@
+"use strict";
+
 import {DeepService} from './DeepService';
 import {FirstService} from './FirstService';
 import {SecondService} from './SecondService';

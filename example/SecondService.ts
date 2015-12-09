@@ -1,3 +1,5 @@
+"use strict";
+
 import {DeepService} from './DeepService';
 import {Inject} from '../src/index'
 
