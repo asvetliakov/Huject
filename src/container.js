@@ -1,5 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="../node_modules/reflect-metadata/reflect-metadata.d.ts" />
 var definition_1 = require('./definition');
 var resolver_1 = require("./resolver");
 var containerfactoryinterface_1 = require("./containerfactoryinterface");

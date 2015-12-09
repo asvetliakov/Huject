@@ -1,10 +1,8 @@
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
-    switch (arguments.length) {
-        case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
-        case 3: return decorators.reduceRight(function(o, d) { return (d && d(target, key)), void 0; }, void 0);
-        case 4: return decorators.reduceRight(function(o, d) { return (d && d(target, key, o)) || o; }, desc);
-    }
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -35,7 +33,7 @@ var AnotherService = (function () {
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', DeepService)
-    ], AnotherService.prototype, "deepService");
+    ], AnotherService.prototype, "deepService", void 0);
     return AnotherService;
 })();
 var TestImplementationWithParamInject = (function () {
@@ -47,7 +45,7 @@ var TestImplementationWithParamInject = (function () {
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', AnotherService)
-    ], TestImplementationWithParamInject.prototype, "service");
+    ], TestImplementationWithParamInject.prototype, "service", void 0);
     return TestImplementationWithParamInject;
 })();
 var ServiceWitDeps = (function () {
@@ -98,15 +96,15 @@ var InjectWithStringDefinition = (function () {
     __decorate([
         decorators_1.Inject('coolnumber'), 
         __metadata('design:type', Number)
-    ], InjectWithStringDefinition.prototype, "num");
+    ], InjectWithStringDefinition.prototype, "num", void 0);
     __decorate([
         decorators_1.Inject('coolstring'), 
         __metadata('design:type', String)
-    ], InjectWithStringDefinition.prototype, "str");
+    ], InjectWithStringDefinition.prototype, "str", void 0);
     __decorate([
         decorators_1.Inject('service', definition_1.FactoryMethod.SINGLETON), 
         __metadata('design:type', DeepService)
-    ], InjectWithStringDefinition.prototype, "service");
+    ], InjectWithStringDefinition.prototype, "service", void 0);
     return InjectWithStringDefinition;
 })();
 var InjectWithStringDefinitionWrong = (function () {
@@ -115,11 +113,11 @@ var InjectWithStringDefinitionWrong = (function () {
     __decorate([
         decorators_1.Inject('coolnumber'), 
         __metadata('design:type', Number)
-    ], InjectWithStringDefinitionWrong.prototype, "num");
+    ], InjectWithStringDefinitionWrong.prototype, "num", void 0);
     __decorate([
         decorators_1.Inject('wrongstring'), 
         __metadata('design:type', String)
-    ], InjectWithStringDefinitionWrong.prototype, "str");
+    ], InjectWithStringDefinitionWrong.prototype, "str", void 0);
     return InjectWithStringDefinitionWrong;
 })();
 var ControllerWithPropertyInjection = (function () {
@@ -128,11 +126,11 @@ var ControllerWithPropertyInjection = (function () {
     __decorate([
         decorators_1.Inject(definition_1.FactoryMethod.SINGLETON), 
         __metadata('design:type', PropertyInjectionTest1)
-    ], ControllerWithPropertyInjection.prototype, "injection1");
+    ], ControllerWithPropertyInjection.prototype, "injection1", void 0);
     __decorate([
         decorators_1.Inject(definition_1.FactoryMethod.SINGLETON), 
         __metadata('design:type', PropertyInjectionTest2)
-    ], ControllerWithPropertyInjection.prototype, "injection2");
+    ], ControllerWithPropertyInjection.prototype, "injection2", void 0);
     return ControllerWithPropertyInjection;
 })();
 var SecondControllerWithPropertyInjection = (function () {
@@ -141,11 +139,11 @@ var SecondControllerWithPropertyInjection = (function () {
     __decorate([
         decorators_1.Inject(definition_1.FactoryMethod.SINGLETON), 
         __metadata('design:type', PropertyInjectionTest1)
-    ], SecondControllerWithPropertyInjection.prototype, "injection1");
+    ], SecondControllerWithPropertyInjection.prototype, "injection1", void 0);
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', PropertyInjectionTest2)
-    ], SecondControllerWithPropertyInjection.prototype, "injection2");
+    ], SecondControllerWithPropertyInjection.prototype, "injection2", void 0);
     return SecondControllerWithPropertyInjection;
 })();
 var ConstructorInjectionWithLiterals = (function () {
@@ -201,12 +199,12 @@ var PropertyInjectionOptional = (function () {
         decorators_1.Inject('nonexiststring'),
         decorators_1.Optional, 
         __metadata('design:type', String)
-    ], PropertyInjectionOptional.prototype, "str");
+    ], PropertyInjectionOptional.prototype, "str", void 0);
     __decorate([
         decorators_1.Inject('nonexistnumber'),
         decorators_1.Optional, 
         __metadata('design:type', Number)
-    ], PropertyInjectionOptional.prototype, "num");
+    ], PropertyInjectionOptional.prototype, "num", void 0);
     return PropertyInjectionOptional;
 })();
 describe("Testing container's autowiring by using decorators", function () {

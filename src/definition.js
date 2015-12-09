@@ -1,4 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
 (function (FactoryMethod) {
     FactoryMethod[FactoryMethod["SINGLETON"] = 0] = "SINGLETON";
     FactoryMethod[FactoryMethod["FACTORY"] = 1] = "FACTORY";

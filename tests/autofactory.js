@@ -4,12 +4,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
-    switch (arguments.length) {
-        case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
-        case 3: return decorators.reduceRight(function(o, d) { return (d && d(target, key)), void 0; }, void 0);
-        case 4: return decorators.reduceRight(function(o, d) { return (d && d(target, key, o)) || o; }, desc);
-    }
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -33,13 +31,12 @@ var TestFactory = (function () {
     TestFactory.prototype.createObject = function () { return null; };
     TestFactory.prototype.nonFactoryMethod = function () { };
     ;
-    Object.defineProperty(TestFactory.prototype, "createObject",
-        __decorate([
-            decorators_1.Factory, 
-            __metadata('design:type', Function), 
-            __metadata('design:paramtypes', []), 
-            __metadata('design:returntype', Model)
-        ], TestFactory.prototype, "createObject", Object.getOwnPropertyDescriptor(TestFactory.prototype, "createObject")));
+    __decorate([
+        decorators_1.Factory, 
+        __metadata('design:type', Function), 
+        __metadata('design:paramtypes', []), 
+        __metadata('design:returntype', Model)
+    ], TestFactory.prototype, "createObject", null);
     TestFactory = __decorate([
         decorators_1.Factory, 
         __metadata('design:paramtypes', [])
@@ -52,13 +49,12 @@ var SecondFactory = (function (_super) {
         _super.apply(this, arguments);
     }
     SecondFactory.prototype.createSecond = function (num) { return null; };
-    Object.defineProperty(SecondFactory.prototype, "createSecond",
-        __decorate([
-            decorators_1.Factory, 
-            __metadata('design:type', Function), 
-            __metadata('design:paramtypes', [Number]), 
-            __metadata('design:returntype', Model)
-        ], SecondFactory.prototype, "createSecond", Object.getOwnPropertyDescriptor(SecondFactory.prototype, "createSecond")));
+    __decorate([
+        decorators_1.Factory, 
+        __metadata('design:type', Function), 
+        __metadata('design:paramtypes', [Number]), 
+        __metadata('design:returntype', Model)
+    ], SecondFactory.prototype, "createSecond", null);
     SecondFactory = __decorate([
         decorators_1.Factory, 
         __metadata('design:paramtypes', [])
@@ -69,13 +65,12 @@ var InvalidFactory = (function () {
     function InvalidFactory() {
     }
     InvalidFactory.prototype.invalidMethod = function () { return null; };
-    Object.defineProperty(InvalidFactory.prototype, "invalidMethod",
-        __decorate([
-            decorators_1.Factory, 
-            __metadata('design:type', Function), 
-            __metadata('design:paramtypes', []), 
-            __metadata('design:returntype', String)
-        ], InvalidFactory.prototype, "invalidMethod", Object.getOwnPropertyDescriptor(InvalidFactory.prototype, "invalidMethod")));
+    __decorate([
+        decorators_1.Factory, 
+        __metadata('design:type', Function), 
+        __metadata('design:paramtypes', []), 
+        __metadata('design:returntype', String)
+    ], InvalidFactory.prototype, "invalidMethod", null);
     InvalidFactory = __decorate([
         decorators_1.Factory, 
         __metadata('design:paramtypes', [])
@@ -88,11 +83,11 @@ var Service = (function () {
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', TestFactory)
-    ], Service.prototype, "factory");
+    ], Service.prototype, "factory", void 0);
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', SecondFactory)
-    ], Service.prototype, "second");
+    ], Service.prototype, "second", void 0);
     return Service;
 })();
 var ErrorService = (function () {
@@ -101,7 +96,7 @@ var ErrorService = (function () {
     __decorate([
         decorators_1.Inject, 
         __metadata('design:type', InvalidFactory)
-    ], ErrorService.prototype, "factory");
+    ], ErrorService.prototype, "factory", void 0);
     return ErrorService;
 })();
 describe("Testing auto-factories", function () {

@@ -2,8 +2,6 @@ import 'es6-collections';
 import 'reflect-metadata';
 import {Definition} from "./definition";
 import {FactoryMethod, DefinitionObjectType} from './definition';
-import {FunctionDeclaration} from "typescript";
-import {DefinitionInfo} from "typescript";
 import {FactoryAutoProxy} from "./factoryautoproxy";
 
 
