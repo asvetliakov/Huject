@@ -1,3 +1,6 @@
+# Version 1.3.4
+Fixed issue #1
+
 # Version 1.3
 Possibility to inject ContainerFactoryInterface to access to container and create objects dynamically
 @Factory decorator to auto-create factories
