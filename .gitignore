@@ -31,6 +31,10 @@ node_modules
 
 example/*.js
 example/*.js.map
+src/**/*.js
+src/**/*.js.map
+tests/**/*.js
+tests/**/*.js.map
 
 .tscache
 
