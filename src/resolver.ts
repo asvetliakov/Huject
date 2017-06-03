@@ -106,7 +106,6 @@ export class ContainerResolver {
                     }
                 }
                 return this.singletonObjects.get(internalDefinition);
-                break;
             case FactoryMethod.FACTORY:
                 if (internalDefinition.definitionObjectType == DefinitionObjectType.CALLABLE) {
                     return constructor.call(this);
@@ -115,10 +114,8 @@ export class ContainerResolver {
                     this.resolveProperties(obj, strict);
                     return obj;
                 }
-                break;
             case FactoryMethod.OBJECT:
                 return constructor;
-                break;
         }
     }
 

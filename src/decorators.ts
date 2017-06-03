@@ -13,7 +13,6 @@ export function ConstructorInject(targetOrFactoryMethodOrLiteral: any, factoryMe
         case 'function':
             Reflect.defineMetadata('inject:constructor', true, targetOrFactoryMethodOrLiteral);
             return targetOrFactoryMethodOrLiteral;
-            break;
         // constructor (@ConstructorInject(FactoryMethod) param1: class, ...);
         case 'number':
             if (typeof targetOrFactoryMethodOrLiteral === 'number') {
@@ -24,7 +23,6 @@ export function ConstructorInject(targetOrFactoryMethodOrLiteral: any, factoryMe
                 let metadataName = 'inject:constructor:param' + parameterIndex + ':method';
                 Reflect.defineMetadata(metadataName, method, target);
             };
-            break;
         // constructor (@ConstructorInject('literal',FactoryMethod) param1: class, ...);
         case 'string':
             let literal: string = targetOrFactoryMethodOrLiteral;
@@ -36,7 +34,6 @@ export function ConstructorInject(targetOrFactoryMethodOrLiteral: any, factoryMe
                 Reflect.defineMetadata(metadataLiteralName, literal, target);
                 Reflect.defineMetadata(metadataFactoryName, method, target);
             };
-            break;
     }
 }
 
@@ -83,7 +80,6 @@ export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactory
                 Reflect.defineMetadata("inject:property", method, target, propertyKey);
                 Reflect.defineMetadata('inject:property:literal', literal, target, propertyKey);
             };
-            break;
         // @Inject(FactoryMethod)
         case 'number':
             method = targetOrFactoryMethodOrLiteral;
@@ -98,7 +94,6 @@ export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactory
                 }
                 Reflect.defineMetadata("inject:property", method, target, propertyKey);
             };
-            break;
     }
 }
 
@@ -139,13 +134,11 @@ export function Factory(...args: any[]): any {
             target = args[0];
             Reflect.defineMetadata('inject:autofactory', true, target);
             return target;
-            break;
         case 3:
             target = args[0];
             let propertyKey = args[1];
             Reflect.defineMetadata('inject:factorymethod', true, target, propertyKey);
             return args[2];
-            break;
         default:
             throw new Error("@Factory decorator is not allowed here");
     }
