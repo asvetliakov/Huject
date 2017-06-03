@@ -118,7 +118,7 @@ declare module Huject {
      *     public service: MyService;
      * }
      */
-    export function Inject(method: FactoryMethod);
+    export function Inject(method: FactoryMethod): any;
 
     /**
      * Property injection by string definition. Literal should be registered with container.register('literal',...); before using
@@ -133,7 +133,7 @@ declare module Huject {
      *     public token: string;
      * }
      */
-    export function Inject(literal: string, method?: FactoryMethod);
+    export function Inject(literal: string, method?: FactoryMethod): any;
 
     /**
      * Property injection. Will instantiate with default factory method or with registered method if dependency was already registered
@@ -174,7 +174,7 @@ declare module Huject {
      *     }
      * }
      */
-    export function ConstructorInject(method: FactoryMethod);
+    export function ConstructorInject(method: FactoryMethod): any;
 
     /**
      * Resolve instance by string definition and pass to constructor argument
@@ -199,7 +199,7 @@ declare module Huject {
      *     }
      * }
      */
-    export function ConstructorInject(literal: string, method?: FactoryMethod);
+    export function ConstructorInject(literal: string, method?: FactoryMethod): any;
 
     /**
      * Specify that property injection should be optional. That means if dependency couldn't be resolved, then leave original specified value
@@ -234,7 +234,7 @@ declare module Huject {
      *     }
      * }
      */
-    export function Optional(target: Object, propertyKey: string|symbol, parameterIndex: number);
+    export function Optional(target: Object, propertyKey: string|symbol, parameterIndex: number): any;
 
     /**
      * Specify that class should be base for auto-factory
