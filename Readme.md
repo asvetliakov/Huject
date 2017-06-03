@@ -11,8 +11,8 @@ This DI container supports:
 * Property and constructor dependencies autowiring
 * Simple API, just 3 methods and few decorators to go
 * Optional injection (from version 1.2)
-* Injecting container as factory (**new** 1.3 version)
-* Auto-Creating object factories! (**new** 1.3 version)
+* Injecting container as factory (from 1.3 version)
+* Auto-Creating object factories! (from 1.3 version)
 
 ## Todo
 * Lazy injection
@@ -234,7 +234,7 @@ You can specify dependencies by using decorators:
 @ConstructorInject(literal: string, method?: FactoryMethod)
 // Use before class property/constructor argument with either @Inject or @ConstructorInject. Specified optional (non-strict) resolution
 // If dependency wasn't found then leave original value (for property injection) or pass null (for constructor injection)
-@Optional
+@Optional()
 // Used for creating auto factories (See below)
 @Factory
 ```
@@ -286,8 +286,8 @@ import {Optional} from 'huject';
 class Test {
     public constructor(
         service: MyService, 
-        @Optional @ConstructorInject('token') param1: string, 
-        @Optional @ConstructorInject('seed') param2: number)
+        @Optional() @ConstructorInject('token') param1: string, 
+        @Optional() @ConstructorInject('seed') param2: number)
     {
         if (param1 !== null) {
             ....
@@ -304,11 +304,11 @@ import {Optional, Inject} from 'huject';
 container.register('classToken', 'mytoken');
 
 class Test {
-    @Optional
+    @Optional()
     @Inject('classToken')
     public classParam1: string = "default string";
     
-    @Optional
+    @Optional()
     @Inject('servicePort')
     public port: number = 80;
 }

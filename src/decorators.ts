@@ -103,23 +103,15 @@ export function Inject(targetOrFactoryMethodOrLiteral: any, propertyKeyOrFactory
  * @constructor
  */
 export function Optional(...args: any[]): any {
-    let target;
-    switch (args.length) {
-        // Property @Optional
-        case 2:
-            target = args[0];
-            let propertyKey = args[1];
+    return function (target: Object, propertyKey: string, parameterIndex: number) {
+        if (typeof parameterIndex === "undefined") {
+            // Property @Optional()
             Reflect.defineMetadata("inject:property:optional", true, target, propertyKey);
-            break;
-        // Constructor @Optional
-        case 3:
-            target = args[0];
-            let parameterIndex = args[2];
+        } else {
+            // Constructor @Optional()
             let metadataName = 'inject:constructor:param' + parameterIndex + ':optional';
             Reflect.defineMetadata(metadataName, true, target);
-            break;
-        default:
-            throw new Error("@Optional decorator is not allowed here");
+        }
     }
 }
 

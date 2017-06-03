@@ -142,8 +142,8 @@ class ConstructorInjectionOptional {
     public num: number;
 
     public constructor(
-        @ConstructorInject(FactoryMethod.SINGLETON) @Optional service: TestInterface,
-        @Optional @ConstructorInject('nonexist') num: number
+        @ConstructorInject(FactoryMethod.SINGLETON) @Optional() service: TestInterface,
+        @Optional() @ConstructorInject('nonexist') num: number
     ) {
         this.test = service;
         this.num = num;
@@ -152,11 +152,11 @@ class ConstructorInjectionOptional {
 
 class PropertyInjectionOptional {
     @Inject('nonexiststring')
-    @Optional
+    @Optional()
     public str: string = "default";
 
     @Inject('nonexistnumber')
-    @Optional
+    @Optional()
     public num: number = 25;
 }
 
@@ -264,10 +264,8 @@ describe("Testing container's autowiring by using decorators", function () {
     });
 
     describe("When property injection has @Optional decorator", () => {
-        let containerSpy;
         beforeEach(() => {
             container.register(PropertyInjectionOptional);
-            containerSpy = sinon.spy(container, 'resolve');
         });
         it("Should leave property original specified value", () => {
             let impl: PropertyInjectionOptional = container.resolve(PropertyInjectionOptional);

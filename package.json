@@ -1,6 +1,6 @@
 {
   "name": "huject",
-  "version": "1.3.4",
+  "version": "1.4.0",
   "description": "Typescript dependency injection container for humans",
   "main": "./src/index.js",
   "scripts": {

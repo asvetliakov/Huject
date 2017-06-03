@@ -12,6 +12,9 @@ module.exports = function(grunt) {
         },
 
         ts: {
+            options: {
+                compiler: "./node_modules/typescript/bin/tsc"
+            },
             default: {
                 src: ['src/**/*.ts'],
                 tsconfig: './tsconfig.json'
